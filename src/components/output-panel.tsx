@@ -1,27 +1,75 @@
 import { search } from "@/lib/nominatim";
+import { fetchMapData, computeBounds } from "@/lib/osm";
 import type { GenerationConfig } from "@/models/generation";
 import { useQuery } from "@tanstack/react-query";
+import MapCanvas from "./map-canvas";
+import { formatCoordinates } from "@/lib/utils";
+import type { GeometryElement } from "@/models/osm";
 
 type Props = {
   config: GenerationConfig;
 };
 
 export default function OutputPanel({ config }: Props) {
-  const { isPending, error, data } = useQuery({
+  const locationQuery = useQuery({
     queryKey: ["nominatim", config.city, config.country],
     queryFn: () => search(config.city, config.country),
   });
 
-  if (isPending) return "Loading...";
+  const mapQuery = useQuery({
+    queryKey: ["osm", locationQuery.data?.lat, locationQuery.data?.lon],
+    queryFn: async () => {
+      if (!locationQuery.data) throw new Error("Location not found");
+      const lat = parseFloat(locationQuery.data.lat);
+      const lon = parseFloat(locationQuery.data.lon);
+      const data = await fetchMapData(lat, lon);
+      const elements = data.elements.filter((el): el is GeometryElement =>
+        el.hasOwnProperty("geometry"),
+      );
+      return {
+        elements,
+        bounds: computeBounds(elements),
+        lat,
+        lon,
+      };
+    },
+    enabled: !!locationQuery.data,
+  });
 
-  if (error) return "An error has occurred: " + error.message;
+  if (locationQuery.isPending)
+    return <div className="p-4">Searching location...</div>;
+
+  if (locationQuery.error)
+    return (
+      <div className="p-4 text-red-500">
+        Error: {locationQuery.error.message}
+      </div>
+    );
+
+  if (mapQuery.isPending) return <div className="p-4">Generating map...</div>;
+
+  if (mapQuery.error)
+    return (
+      <div className="p-4 text-red-500">Error: {mapQuery.error.message}</div>
+    );
+
+  if (!mapQuery.data)
+    return <div className="p-4 text-red-500">No map data available</div>;
 
   return (
-    <div>
-      <div>
-        You set City: {config.city}, County: {config.country}
-      </div>
-      <code>{JSON.stringify(data, null, "\n")}</code>
+    <div className="p-4">
+      <h2 className="mb-4 text-2xl font-bold">
+        {config.city}, {config.country}
+      </h2>
+      <MapCanvas
+        elements={mapQuery.data.elements}
+        bounds={mapQuery.data.bounds}
+        displayConfig={{
+          mainHeading: config.city,
+          subHeading: config.country,
+          coordinates: formatCoordinates(mapQuery.data.lat, mapQuery.data.lon),
+        }}
+      />
     </div>
   );
 }

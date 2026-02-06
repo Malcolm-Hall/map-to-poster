@@ -3,7 +3,7 @@ import type { NominatimPlace } from "@/models/nominatim";
 export async function search(
   city: string,
   country: string,
-): Promise<NominatimPlace[]> {
+): Promise<NominatimPlace> {
   const params = new URLSearchParams({
     q: `${city}, ${country}`,
     format: "jsonv2",
@@ -12,5 +12,6 @@ export async function search(
   const response = await fetch(
     `https://nominatim.openstreetmap.org/search?${params}`,
   );
-  return await response.json();
+  const data: NominatimPlace[] = await response.json();
+  return data[0];
 }
