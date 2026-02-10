@@ -60,14 +60,13 @@ export function renderMapPoster(
 
   for (const el of elements) {
     const type = el.tags?.highway;
-    if (!type) continue;
+    if (!type || !el.geometry) continue;
 
-    const style =
-      THEME.roads[type as keyof typeof THEME.roads] || THEME.roads.default;
+    const style = getRoadStyle(type);
 
     ctx.strokeStyle = style.color;
     ctx.lineWidth = style.width;
-    drawPath(ctx, el.geometry!, bbox);
+    drawPath(ctx, el.geometry, bbox);
   }
 
   // Text overlay
@@ -91,4 +90,29 @@ export function exportCanvasAsPNG(
   link.download = filename;
   link.href = canvas.toDataURL("image/png");
   link.click();
+}
+
+function getRoadStyle(type: string) {
+  switch (type) {
+    case "motorway_link":
+    case "motorway":
+      return THEME["roads"].motorway;
+    case "primary":
+    case "primary_link":
+    case "trunk":
+    case "trunk_link":
+      return THEME.roads.primary;
+    case "secondary":
+    case "secondary_link":
+      return THEME.roads.secondary;
+    case "tertiary":
+    case "tertiary_link":
+      return THEME.roads.tertiary;
+    case "residential":
+    case "living_street":
+      return THEME.roads.residential;
+    case "unclassified":
+    default:
+      return THEME.roads.default;
+  }
 }
