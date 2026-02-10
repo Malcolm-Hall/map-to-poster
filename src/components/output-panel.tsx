@@ -1,6 +1,6 @@
 import { search } from "@/lib/nominatim";
-import { fetchMapData, computeBounds } from "@/lib/osm";
-import type { GenerationConfig } from "@/models/generation";
+import { fetchMapData, bboxFromPoint } from "@/lib/osm";
+import { RADIUS_METERS, type GenerationConfig } from "@/models/generation";
 import { useQuery } from "@tanstack/react-query";
 import MapCanvas from "./map-canvas";
 import { formatCoordinates } from "@/lib/utils";
@@ -22,13 +22,14 @@ export default function OutputPanel({ config }: Props) {
       if (!locationQuery.data) throw new Error("Location not found");
       const lat = parseFloat(locationQuery.data.lat);
       const lon = parseFloat(locationQuery.data.lon);
-      const data = await fetchMapData(lat, lon);
+      const bbox = bboxFromPoint({ lat, lon }, RADIUS_METERS);
+      const data = await fetchMapData(bbox);
       const elements = data.elements.filter((el): el is GeometryElement =>
         el.hasOwnProperty("geometry"),
       );
       return {
         elements,
-        bounds: computeBounds(elements),
+        bbox,
         lat,
         lon,
       };
@@ -63,7 +64,7 @@ export default function OutputPanel({ config }: Props) {
       </h2>
       <MapCanvas
         elements={mapQuery.data.elements}
-        bounds={mapQuery.data.bounds}
+        bbox={mapQuery.data.bbox}
         displayConfig={{
           mainHeading: config.city,
           subHeading: config.country,

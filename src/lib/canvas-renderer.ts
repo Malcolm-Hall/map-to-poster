@@ -1,27 +1,27 @@
 import { CANVAS_SIZE, THEME, type DisplayConfig } from "@/models/generation";
-import type { Bounds, GeometryElement } from "@/models/osm";
+import type { GeometryElement } from "@/models/osm";
+import type { OverpassBbox } from "overpass-ts";
 
 function projectCoordinate(
   lat: number,
   lon: number,
-  bounds: Bounds,
+  bbox: OverpassBbox,
 ): { x: number; y: number } {
-  const x =
-    ((lon - bounds.minLon) / (bounds.maxLon - bounds.minLon)) * CANVAS_SIZE;
+  const x = ((lon - bbox.minlon) / (bbox.maxlon - bbox.minlon)) * CANVAS_SIZE;
   const y =
     CANVAS_SIZE -
-    ((lat - bounds.minLat) / (bounds.maxLat - bounds.minLat)) * CANVAS_SIZE;
+    ((lat - bbox.minlat) / (bbox.maxlat - bbox.minlat)) * CANVAS_SIZE;
   return { x, y };
 }
 
 function drawPath(
   ctx: CanvasRenderingContext2D,
   geometry: Array<{ lat: number; lon: number }>,
-  bounds: Bounds,
+  bbox: OverpassBbox,
 ): void {
   ctx.beginPath();
   geometry.forEach((p, i) => {
-    const { x, y } = projectCoordinate(p.lat, p.lon, bounds);
+    const { x, y } = projectCoordinate(p.lat, p.lon, bbox);
     if (i === 0) ctx.moveTo(x, y);
     else ctx.lineTo(x, y);
   });
@@ -31,11 +31,11 @@ function drawPath(
 function drawPolygon(
   ctx: CanvasRenderingContext2D,
   geometry: Array<{ lat: number; lon: number }>,
-  bounds: Bounds,
+  bbox: OverpassBbox,
 ): void {
   ctx.beginPath();
   geometry.forEach((p, i) => {
-    const { x, y } = projectCoordinate(p.lat, p.lon, bounds);
+    const { x, y } = projectCoordinate(p.lat, p.lon, bbox);
     if (i === 0) ctx.moveTo(x, y);
     else ctx.lineTo(x, y);
   });
@@ -46,7 +46,7 @@ function drawPolygon(
 export function renderMapPoster(
   canvas: HTMLCanvasElement,
   elements: GeometryElement[],
-  bounds: Bounds,
+  bbox: OverpassBbox,
   options: DisplayConfig,
 ): void {
   canvas.width = CANVAS_SIZE;
@@ -67,7 +67,7 @@ export function renderMapPoster(
 
     ctx.strokeStyle = style.color;
     ctx.lineWidth = style.width;
-    drawPath(ctx, el.geometry!, bounds);
+    drawPath(ctx, el.geometry!, bbox);
   }
 
   // Text overlay
@@ -78,6 +78,9 @@ export function renderMapPoster(
 
   ctx.font = "32px sans-serif";
   ctx.fillText(options.subHeading, CANVAS_SIZE / 2, CANVAS_SIZE - 70);
+
+  ctx.font = "24px sans-serif";
+  ctx.fillText(options.coordinates, CANVAS_SIZE / 2, CANVAS_SIZE - 30);
 }
 
 export function exportCanvasAsPNG(

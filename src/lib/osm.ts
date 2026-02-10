@@ -1,49 +1,43 @@
-import { RADIUS_METERS } from "@/models/generation";
+import { ALL_NETWORK_QUERY, OSM_TIMEOUT } from "@/models/osm";
 import {
-  ALL_NETWORK_QUERY,
-  OSM_TIMEOUT,
-  type Bounds,
-  type GeometryElement,
-} from "@/models/osm";
-import { overpassJson, type OverpassJson } from "overpass-ts";
+  overpassJson,
+  type OverpassBbox,
+  type OverpassJson,
+  type OverpassPointGeom,
+} from "overpass-ts";
+import { degToRad, radToDeg } from "./utils";
 
-export async function fetchMapData(
-  lat: number,
-  lon: number,
-): Promise<OverpassJson> {
-  const query = `[out:json][timeout:${OSM_TIMEOUT}];(way${ALL_NETWORK_QUERY}(around:${RADIUS_METERS},${lat},${lon}););out geom;`;
+export async function fetchMapData(bbox: OverpassBbox): Promise<OverpassJson> {
+  const query = `[out:json][timeout:${OSM_TIMEOUT}]${formatOverpassBboxQuery(bbox)};(way${ALL_NETWORK_QUERY};);out geom;`;
   return await overpassJson(query);
 }
 
-export function computeBounds(elements: GeometryElement[]): Bounds {
-  let minLat = Infinity;
-  let maxLat = -Infinity;
-  let minLon = Infinity;
-  let maxLon = -Infinity;
+const EARTH_RADIUS_METERS = 6_371_000;
 
-  for (const el of elements) {
-    if (!el.geometry) continue;
-    for (const point of el.geometry) {
-      minLat = Math.min(minLat, point.lat);
-      maxLat = Math.max(maxLat, point.lat);
-      minLon = Math.min(minLon, point.lon);
-      maxLon = Math.max(maxLon, point.lon);
-    }
-  }
-
-  return { minLat, maxLat, minLon, maxLon };
+export function bboxFromPoint(
+  { lat, lon }: OverpassPointGeom,
+  radiusMeters: number,
+): OverpassBbox {
+  const delta_lat = radToDeg(radiusMeters / EARTH_RADIUS_METERS);
+  const delta_lon =
+    radToDeg(radiusMeters / EARTH_RADIUS_METERS) / Math.cos(degToRad(lat));
+  const top = lat + delta_lat;
+  const bottom = lat - delta_lat;
+  const right = lon + delta_lon;
+  const left = lon - delta_lon;
+  return {
+    minlon: left,
+    minlat: bottom,
+    maxlon: right,
+    maxlat: top,
+  };
 }
 
-export function projectCoordinate(
-  lat: number,
-  lon: number,
-  bounds: Bounds,
-  canvasSize: number,
-): { x: number; y: number } {
-  const x =
-    ((lon - bounds.minLon) / (bounds.maxLon - bounds.minLon)) * canvasSize;
-  const y =
-    canvasSize -
-    ((lat - bounds.minLat) / (bounds.maxLat - bounds.minLat)) * canvasSize;
-  return { x, y };
+function formatOverpassBboxQuery({
+  minlat,
+  minlon,
+  maxlat,
+  maxlon,
+}: OverpassBbox) {
+  return `[bbox:${minlat}, ${minlon}, ${maxlat}, ${maxlon}]`;
 }

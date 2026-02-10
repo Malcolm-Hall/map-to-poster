@@ -2,22 +2,23 @@ import { useEffect, useRef } from "react";
 import { renderMapPoster, exportCanvasAsPNG } from "@/lib/canvas-renderer";
 import { Button } from "@/components/ui/button";
 import type { DisplayConfig } from "@/models/generation";
-import type { Bounds, GeometryElement } from "@/models/osm";
+import type { GeometryElement } from "@/models/osm";
+import type { OverpassBbox } from "overpass-ts";
 
 type Props = {
   elements: GeometryElement[];
-  bounds: Bounds;
+  bbox: OverpassBbox;
   displayConfig: DisplayConfig;
 };
 
-export default function MapCanvas({ elements, bounds, displayConfig }: Props) {
+export default function MapCanvas({ elements, bbox, displayConfig }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     if (canvasRef.current) {
-      renderMapPoster(canvasRef.current, elements, bounds, displayConfig);
+      renderMapPoster(canvasRef.current, elements, bbox, displayConfig);
     }
-  }, [elements, bounds, displayConfig]);
+  }, [elements, bbox, displayConfig]);
 
   const handleDownload = () => {
     if (canvasRef.current) {
