@@ -47,6 +47,7 @@ export function renderMapPoster(
   canvas: HTMLCanvasElement,
   elements: GeometryElement[],
   waterElements: GeometryElement[],
+  parkElements: GeometryElement[],
   bbox: OverpassBbox,
   options: DisplayConfig,
 ): void {
@@ -64,6 +65,14 @@ export function renderMapPoster(
     if (!type || !el.geometry) continue;
 
     ctx.fillStyle = THEME.water;
+    drawPolygon(ctx, el.geometry, bbox);
+  }
+
+  for (const el of parkElements) {
+    const type = el.tags?.leisure || el.tags?.landuse;
+    if (!type || !el.geometry) continue;
+
+    ctx.fillStyle = THEME.park;
     drawPolygon(ctx, el.geometry, bbox);
   }
 

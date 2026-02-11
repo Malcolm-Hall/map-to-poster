@@ -1,6 +1,7 @@
 import {
   ALL_NETWORK_QUERY,
   OSM_BASE_QUERY,
+  PARK_FEATURES_QUERY,
   WATER_FEATURES_QUERY,
 } from "@/models/osm";
 import {
@@ -18,6 +19,11 @@ export async function fetchMapData(bbox: OverpassBbox): Promise<OverpassJson> {
 
 export async function fetchWaterData(bbox: OverpassBbox) {
   const query = `${OSM_BASE_QUERY}${formatOverpassBboxQuery(bbox)};(${WATER_FEATURES_QUERY});out geom;`;
+  return await overpassJson(query);
+}
+
+export async function fetchParkData(bbox: OverpassBbox) {
+  const query = `${OSM_BASE_QUERY}${formatOverpassBboxQuery(bbox)};(${PARK_FEATURES_QUERY});out geom;`;
   return await overpassJson(query);
 }
 

@@ -24,6 +24,7 @@ export default function InputForm({ onSubmit }: Props) {
           city: e.target.city.value,
           country: e.target.country.value,
           showWaterFeatures: e.target["water-features-enabled"].checked,
+          showParkFeatures: e.target["park-features-enabled"].checked,
         });
       }}
     >
@@ -35,6 +36,10 @@ export default function InputForm({ onSubmit }: Props) {
         <Field>
           <FieldLabel htmlFor="country">Country</FieldLabel>
           <Input id="country" placeholder="USA" required />
+        </Field>
+        <Field orientation="horizontal">
+          <Checkbox id="park-features" name="park-features-enabled" />
+          <FieldLabel htmlFor="park-features">Enable Park Features</FieldLabel>
         </Field>
         <Field orientation="horizontal">
           <Checkbox id="water-features" name="water-features-enabled" />

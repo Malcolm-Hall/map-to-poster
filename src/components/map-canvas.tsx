@@ -8,6 +8,7 @@ import type { OverpassBbox } from "overpass-ts";
 type Props = {
   elements: GeometryElement[];
   waterElements: GeometryElement[];
+  parkElements: GeometryElement[];
   bbox: OverpassBbox;
   displayConfig: DisplayConfig;
 };
@@ -15,6 +16,7 @@ type Props = {
 export default function MapCanvas({
   elements,
   waterElements,
+  parkElements,
   bbox,
   displayConfig,
 }: Props) {
@@ -26,6 +28,7 @@ export default function MapCanvas({
         canvasRef.current,
         elements,
         waterElements,
+        parkElements,
         bbox,
         displayConfig,
       );
