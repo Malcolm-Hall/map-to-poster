@@ -16,6 +16,7 @@ export default function InputForm({ onSubmit }: Props) {
         onSubmit({
           city: e.target.city.value,
           country: e.target.country.value,
+          showWaterFeatures: false,
         });
       }}
     >

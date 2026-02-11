@@ -7,16 +7,28 @@ import type { OverpassBbox } from "overpass-ts";
 
 type Props = {
   elements: GeometryElement[];
+  waterElements: GeometryElement[];
   bbox: OverpassBbox;
   displayConfig: DisplayConfig;
 };
 
-export default function MapCanvas({ elements, bbox, displayConfig }: Props) {
+export default function MapCanvas({
+  elements,
+  waterElements,
+  bbox,
+  displayConfig,
+}: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     if (canvasRef.current) {
-      renderMapPoster(canvasRef.current, elements, bbox, displayConfig);
+      renderMapPoster(
+        canvasRef.current,
+        elements,
+        waterElements,
+        bbox,
+        displayConfig,
+      );
     }
   }, [elements, bbox, displayConfig]);
 

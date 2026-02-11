@@ -1,6 +1,7 @@
 export type GenerationConfig = {
   city: string;
   country: string;
+  showWaterFeatures?: boolean;
 };
 
 export const CANVAS_SIZE = 2000;

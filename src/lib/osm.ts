@@ -1,4 +1,8 @@
-import { ALL_NETWORK_QUERY, OSM_TIMEOUT } from "@/models/osm";
+import {
+  ALL_NETWORK_QUERY,
+  OSM_BASE_QUERY,
+  WATER_FEATURES_QUERY,
+} from "@/models/osm";
 import {
   overpassJson,
   type OverpassBbox,
@@ -8,7 +12,12 @@ import {
 import { degToRad, radToDeg } from "./utils";
 
 export async function fetchMapData(bbox: OverpassBbox): Promise<OverpassJson> {
-  const query = `[out:json][timeout:${OSM_TIMEOUT}]${formatOverpassBboxQuery(bbox)};(way${ALL_NETWORK_QUERY};);out geom;`;
+  const query = `${OSM_BASE_QUERY}${formatOverpassBboxQuery(bbox)};(${ALL_NETWORK_QUERY});out geom;`;
+  return await overpassJson(query);
+}
+
+export async function fetchWaterData(bbox: OverpassBbox) {
+  const query = `${OSM_BASE_QUERY}${formatOverpassBboxQuery(bbox)};(${WATER_FEATURES_QUERY});out geom;`;
   return await overpassJson(query);
 }
 

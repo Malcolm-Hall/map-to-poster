@@ -46,6 +46,7 @@ function drawPolygon(
 export function renderMapPoster(
   canvas: HTMLCanvasElement,
   elements: GeometryElement[],
+  waterElements: GeometryElement[],
   bbox: OverpassBbox,
   options: DisplayConfig,
 ): void {
@@ -57,6 +58,14 @@ export function renderMapPoster(
 
   ctx.fillStyle = THEME.background;
   ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+
+  for (const el of waterElements) {
+    const type = el.tags?.natural || el.tags?.waterway;
+    if (!type || !el.geometry) continue;
+
+    ctx.fillStyle = THEME.water;
+    drawPolygon(ctx, el.geometry, bbox);
+  }
 
   for (const el of elements) {
     const type = el.tags?.highway;
