@@ -5,7 +5,7 @@ import {
   fetchWaterData,
   fetchParkData,
 } from "@/lib/osm";
-import { RADIUS_METERS, type GenerationConfig } from "@/models/generation";
+import { type GenerationConfig } from "@/models/generation";
 import { useQuery } from "@tanstack/react-query";
 import MapCanvas from "./map-canvas";
 import { formatCoordinates } from "@/lib/utils";
@@ -23,7 +23,11 @@ export default function OutputPanel({ config }: Props) {
 
   const lat = parseFloat(locationQuery.data?.lat ?? "0");
   const lon = parseFloat(locationQuery.data?.lon ?? "0");
-  const bbox = bboxFromPoint({ lat, lon }, RADIUS_METERS, config.resolution);
+  const bbox = bboxFromPoint(
+    { lat, lon },
+    config.radiusMeters,
+    config.resolution,
+  );
 
   const mapQuery = useQuery({
     queryKey: ["osm", "map", bbox],

@@ -19,11 +19,15 @@ export type GenerationConfig = {
   city: string;
   country: string;
   resolution: PosterResolution;
+  radiusMeters: number;
   showWaterFeatures?: boolean;
   showParkFeatures?: boolean;
 };
 
-export const RADIUS_METERS = 2000;
+export const MIN_DISTANCE = 1000;
+export const MAX_DISTANCE = 20_000;
+export const DEFAULT_DISTANCE = 2000;
+export const DISTANCE_STEP = 100;
 
 export const THEME = {
   background: "#151515",

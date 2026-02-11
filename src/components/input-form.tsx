@@ -8,6 +8,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
+  DEFAULT_DISTANCE,
+  DISTANCE_STEP,
+  MAX_DISTANCE,
+  MIN_DISTANCE,
   resolutionOptions,
   resolutionValues,
   type GenerationConfig,
@@ -21,12 +25,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
+import { useState } from "react";
 
 type Props = {
   onSubmit: (config: GenerationConfig) => void;
 };
 
 export default function InputForm({ onSubmit }: Props) {
+  const [distance, setDistance] = useState<number | "">(DEFAULT_DISTANCE);
   return (
     <form
       className="m-4 max-w-sm"
@@ -42,6 +49,7 @@ export default function InputForm({ onSubmit }: Props) {
           showWaterFeatures: e.target["water-features-enabled"].checked,
           showParkFeatures: e.target["park-features-enabled"].checked,
           resolution,
+          radiusMeters: distance || DEFAULT_DISTANCE,
         });
       }}
     >
@@ -71,6 +79,42 @@ export default function InputForm({ onSubmit }: Props) {
               ))}
             </SelectContent>
           </Select>
+        </Field>
+        <Field>
+          <FieldLabel htmlFor="map-distance">Map Radius (meters)</FieldLabel>
+          <div className="flex items-center gap-3">
+            <div className="flex-1">
+              <Slider
+                min={MIN_DISTANCE}
+                max={MAX_DISTANCE}
+                step={DISTANCE_STEP}
+                value={[distance || 0]}
+                onValueChange={(v) => setDistance(v[0])}
+              />
+            </div>
+            <div className="w-18">
+              <Input
+                id="map-distance"
+                type="text"
+                value={distance}
+                onChange={(e) => {
+                  if (!e.target.value) {
+                    setDistance("");
+                    return;
+                  }
+                  const val = Number(e.target.value);
+                  if (Number.isNaN(val)) return;
+                  const clamped = Math.min(Math.max(val, 0), MAX_DISTANCE);
+                  setDistance(clamped);
+                }}
+                onBlur={() => {
+                  if (distance === "" || distance < MIN_DISTANCE) {
+                    setDistance(MIN_DISTANCE);
+                  }
+                }}
+              />
+            </div>
+          </div>
         </Field>
         <Field orientation="horizontal">
           <Checkbox id="park-features" name="park-features-enabled" />
