@@ -1,11 +1,28 @@
+export const resolutionOptions = [
+  { name: "Square (1080x1080)", value: "square" },
+  { name: "Full HD (1920x1080)", value: "fhd" },
+  { name: "QHD (2560x1440)", value: "qhd" },
+  { name: "4K (3840x2160)", value: "4k" },
+] as const;
+
+export type ResolutionType = (typeof resolutionOptions)[number]["value"];
+export type PosterResolution = { width: number; height: number };
+
+export const resolutionValues: Record<ResolutionType, PosterResolution> = {
+  fhd: { height: 1920, width: 1080 },
+  qhd: { height: 2560, width: 1440 },
+  "4k": { height: 3840, width: 2160 },
+  square: { height: 1080, width: 1080 },
+};
+
 export type GenerationConfig = {
   city: string;
   country: string;
+  resolution: PosterResolution;
   showWaterFeatures?: boolean;
   showParkFeatures?: boolean;
 };
 
-export const CANVAS_SIZE = 2000;
 export const RADIUS_METERS = 2000;
 
 export const THEME = {

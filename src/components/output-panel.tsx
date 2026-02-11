@@ -18,25 +18,17 @@ type Props = {
 export default function OutputPanel({ config }: Props) {
   const locationQuery = useQuery({
     queryKey: ["nominatim", config.city, config.country],
-    queryFn: async () => {
-      const place = await search(config.city, config.country);
-      const lat = parseFloat(place.lat);
-      const lon = parseFloat(place.lon);
-      const bbox = bboxFromPoint({ lat, lon }, RADIUS_METERS);
-      return {
-        place,
-        lat,
-        lon,
-        bbox,
-      };
-    },
+    queryFn: () => search(config.city, config.country),
   });
 
+  const lat = parseFloat(locationQuery.data?.lat ?? "0");
+  const lon = parseFloat(locationQuery.data?.lon ?? "0");
+  const bbox = bboxFromPoint({ lat, lon }, RADIUS_METERS, config.resolution);
+
   const mapQuery = useQuery({
-    queryKey: ["osm", "map", locationQuery.data?.lat, locationQuery.data?.lon],
+    queryKey: ["osm", "map", bbox],
     queryFn: async () => {
-      if (!locationQuery.data) throw new Error("Location not found");
-      const data = await fetchMapData(locationQuery.data.bbox);
+      const data = await fetchMapData(bbox);
       const elements = data.elements.filter((el): el is GeometryElement =>
         el.hasOwnProperty("geometry"),
       );
@@ -46,15 +38,9 @@ export default function OutputPanel({ config }: Props) {
   });
 
   const waterQuery = useQuery({
-    queryKey: [
-      "osm",
-      "water",
-      locationQuery.data?.lat,
-      locationQuery.data?.lon,
-    ],
+    queryKey: ["osm", "water", bbox],
     queryFn: async () => {
-      if (!locationQuery.data) throw new Error("Location not found");
-      const data = await fetchWaterData(locationQuery.data.bbox);
+      const data = await fetchWaterData(bbox);
       const elements = data.elements.filter((el): el is GeometryElement =>
         el.hasOwnProperty("geometry"),
       );
@@ -65,10 +51,9 @@ export default function OutputPanel({ config }: Props) {
   });
 
   const parkQuery = useQuery({
-    queryKey: ["osm", "park", locationQuery.data?.lat, locationQuery.data?.lon],
+    queryKey: ["osm", "park", bbox],
     queryFn: async () => {
-      if (!locationQuery.data) throw new Error("Location not found");
-      const data = await fetchParkData(locationQuery.data.bbox);
+      const data = await fetchParkData(bbox);
       const elements = data.elements.filter((el): el is GeometryElement =>
         el.hasOwnProperty("geometry"),
       );
@@ -133,14 +118,12 @@ export default function OutputPanel({ config }: Props) {
         elements={mapQuery.data}
         waterElements={config.showWaterFeatures ? (waterQuery.data ?? []) : []}
         parkElements={config.showParkFeatures ? (parkQuery.data ?? []) : []}
-        bbox={locationQuery.data.bbox}
+        bbox={bbox}
+        resolution={config.resolution}
         displayConfig={{
           mainHeading: config.city,
           subHeading: config.country,
-          coordinates: formatCoordinates(
-            locationQuery.data.lat,
-            locationQuery.data.lon,
-          ),
+          coordinates: formatCoordinates(lat, lon),
         }}
       />
     </div>

@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { renderMapPoster, exportCanvasAsPNG } from "@/lib/canvas-renderer";
 import { Button } from "@/components/ui/button";
-import type { DisplayConfig } from "@/models/generation";
+import type { DisplayConfig, PosterResolution } from "@/models/generation";
 import type { GeometryElement } from "@/models/osm";
 import type { OverpassBbox } from "overpass-ts";
 
@@ -10,6 +10,7 @@ type Props = {
   waterElements: GeometryElement[];
   parkElements: GeometryElement[];
   bbox: OverpassBbox;
+  resolution: PosterResolution;
   displayConfig: DisplayConfig;
 };
 
@@ -18,6 +19,7 @@ export default function MapCanvas({
   waterElements,
   parkElements,
   bbox,
+  resolution,
   displayConfig,
 }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -30,10 +32,11 @@ export default function MapCanvas({
         waterElements,
         parkElements,
         bbox,
+        resolution,
         displayConfig,
       );
     }
-  }, [elements, bbox, displayConfig]);
+  }, [elements, waterElements, parkElements, bbox, resolution, displayConfig]);
 
   const handleDownload = () => {
     if (canvasRef.current) {
@@ -46,10 +49,7 @@ export default function MapCanvas({
 
   return (
     <div className="flex flex-col items-center gap-4">
-      <canvas
-        ref={canvasRef}
-        className="max-w-full rounded border border-gray-300"
-      />
+      <canvas ref={canvasRef} className="rounded border border-gray-300" />
       <Button onClick={handleDownload}>Download as PNG</Button>
     </div>
   );

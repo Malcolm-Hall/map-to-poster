@@ -11,6 +11,7 @@ import {
   type OverpassPointGeom,
 } from "overpass-ts";
 import { degToRad, radToDeg } from "./utils";
+import type { PosterResolution } from "@/models/generation";
 
 export async function fetchMapData(bbox: OverpassBbox): Promise<OverpassJson> {
   const query = `${OSM_BASE_QUERY}${formatOverpassBboxQuery(bbox)};(${ALL_NETWORK_QUERY});out geom;`;
@@ -32,10 +33,21 @@ const EARTH_RADIUS_METERS = 6_371_000;
 export function bboxFromPoint(
   { lat, lon }: OverpassPointGeom,
   radiusMeters: number,
+  resolution: PosterResolution,
 ): OverpassBbox {
-  const delta_lat = radToDeg(radiusMeters / EARTH_RADIUS_METERS);
+  let adjustedX: number;
+  let adjustedY: number;
+  if (resolution.width > resolution.height) {
+    adjustedX = radiusMeters;
+    adjustedY = (radiusMeters * resolution.height) / resolution.width;
+  } else {
+    adjustedX = (radiusMeters * resolution.width) / resolution.height;
+    adjustedY = radiusMeters;
+  }
+
+  const delta_lat = radToDeg(adjustedY / EARTH_RADIUS_METERS);
   const delta_lon =
-    radToDeg(radiusMeters / EARTH_RADIUS_METERS) / Math.cos(degToRad(lat));
+    radToDeg(adjustedX / EARTH_RADIUS_METERS) / Math.cos(degToRad(lat));
   const top = lat + delta_lat;
   const bottom = lat - delta_lat;
   const right = lon + delta_lon;
