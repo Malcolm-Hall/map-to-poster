@@ -69,6 +69,7 @@ export function renderMapPoster(
   ctx.fillStyle = THEME.background;
   ctx.fillRect(0, 0, resolution.width, resolution.height);
 
+  // Draw water
   for (const el of waterElements) {
     const type = el.tags?.natural || el.tags?.waterway;
     if (!type || !el.geometry) continue;
@@ -77,6 +78,7 @@ export function renderMapPoster(
     drawPolygon(ctx, el.geometry, bbox, resolution);
   }
 
+  // Draw parks
   for (const el of parkElements) {
     const type = el.tags?.leisure || el.tags?.landuse;
     if (!type || !el.geometry) continue;
@@ -85,6 +87,7 @@ export function renderMapPoster(
     drawPolygon(ctx, el.geometry, bbox, resolution);
   }
 
+  // Draw roads
   for (const el of elements) {
     const type = el.tags?.highway;
     if (!type || !el.geometry) continue;
@@ -95,6 +98,31 @@ export function renderMapPoster(
     ctx.lineWidth = style.width;
     drawPath(ctx, el.geometry, bbox, resolution);
   }
+
+  // Gradient overlay
+  const gradientSize = Math.floor(resolution.height / 4);
+
+  const topGrad = ctx.createLinearGradient(0, 0, 0, gradientSize);
+  topGrad.addColorStop(0, THEME.gradient);
+  topGrad.addColorStop(1, "rgba(0,0,0,0)");
+  ctx.fillStyle = topGrad;
+  ctx.fillRect(0, 0, resolution.width, gradientSize);
+
+  const bottomGrad = ctx.createLinearGradient(
+    0,
+    resolution.height,
+    0,
+    resolution.height - gradientSize,
+  );
+  bottomGrad.addColorStop(0, THEME.gradient);
+  bottomGrad.addColorStop(1, "rgba(0,0,0,0)");
+  ctx.fillStyle = bottomGrad;
+  ctx.fillRect(
+    0,
+    resolution.height - gradientSize,
+    resolution.width,
+    gradientSize,
+  );
 
   // Text overlay
   ctx.fillStyle = THEME.text;

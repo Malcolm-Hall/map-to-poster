@@ -77,6 +77,7 @@ export const THEME = {
     default: { color: "#ffff00", width: 0.6 }, //yellow
   },
   text: "#ffffff",
+  gradient: "#ffffff",
 };
 
 export type DisplayConfig = {
