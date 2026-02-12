@@ -1,19 +1,54 @@
-export const resolutionOptions = [
-  { name: "Square (1080x1080)", value: "square" },
-  { name: "Full HD (1920x1080)", value: "fhd" },
-  { name: "QHD (2560x1440)", value: "qhd" },
-  { name: "4K (3840x2160)", value: "4k" },
-] as const;
+export const DEFAULT_CUSTOM_RESOLUTION = 1080;
+export const MAX_CUSTOM_RESOLUTION = 10_000;
+export const MIN_CUSTOM_RESOLUTION = 300;
 
-export type ResolutionType = (typeof resolutionOptions)[number]["value"];
+export const resolutionMap = {
+  square: {
+    name: "HD Square (1080x1080)",
+    value: { width: 1080, height: 1080 },
+  },
+  fhdPortrait: {
+    name: "HD Portrait (1080x1920)",
+    value: { width: 1080, height: 1920 },
+  },
+  fhdLandscape: {
+    name: "HD Landscape (1920x1080)",
+    value: { height: 1080, width: 1920 },
+  },
+  qhdPortrait: {
+    name: "QHD Portrait (1440x2560)",
+    value: { width: 1440, height: 2560 },
+  },
+  qhdLandscape: {
+    name: "QHD Landscape (2560x1440)",
+    value: { height: 1440, width: 2560 },
+  },
+  "4kPortrait": {
+    name: "4K Portrait (2160x3840)",
+    value: { width: 2160, height: 3840 },
+  },
+  "4kLandscape": {
+    name: "4K Landscape (3840x2160)",
+    value: { height: 2160, width: 3840 },
+  },
+  custom: {
+    name: "Custom",
+    value: {
+      width: DEFAULT_CUSTOM_RESOLUTION,
+      height: DEFAULT_CUSTOM_RESOLUTION,
+    },
+  },
+} as const;
+
+export type ResolutionType = keyof typeof resolutionMap;
+export type ResolutionOption = (typeof resolutionMap)[ResolutionType];
 export type PosterResolution = { width: number; height: number };
 
-export const resolutionValues: Record<ResolutionType, PosterResolution> = {
-  fhd: { height: 1920, width: 1080 },
-  qhd: { height: 2560, width: 1440 },
-  "4k": { height: 3840, width: 2160 },
-  square: { height: 1080, width: 1080 },
-};
+export const resolutionOptions = Object.entries(resolutionMap).map(
+  ([key, value]) => ({ key, ...value }),
+) as {
+  [K in ResolutionType]: { key: K } & (typeof resolutionMap)[K];
+}[ResolutionType][];
 
 export type GenerationConfig = {
   city: string;
