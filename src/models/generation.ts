@@ -24,10 +24,10 @@ export type GenerationConfig = {
   showParkFeatures?: boolean;
 };
 
-export const MIN_DISTANCE = 1000;
-export const MAX_DISTANCE = 20_000;
-export const DEFAULT_DISTANCE = 2000;
-export const DISTANCE_STEP = 100;
+export const MIN_MAP_RADIUS = 1000;
+export const MAX_MAP_RADIUS = 20_000;
+export const DEFAULT_MAP_RADIUS = 2000;
+export const MAP_RADIUS_STEP = 100;
 
 export const THEME = {
   background: "#151515",

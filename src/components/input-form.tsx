@@ -8,10 +8,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
-  DEFAULT_DISTANCE,
-  DISTANCE_STEP,
-  MAX_DISTANCE,
-  MIN_DISTANCE,
+  DEFAULT_MAP_RADIUS,
+  MAP_RADIUS_STEP,
+  MAX_MAP_RADIUS,
+  MIN_MAP_RADIUS,
   resolutionOptions,
   resolutionValues,
   type GenerationConfig,
@@ -48,7 +48,7 @@ type Props = {
 };
 
 export default function InputForm({ onSubmit }: Props) {
-  const [distance, setDistance] = useState<number | "">(DEFAULT_DISTANCE);
+  const [mapRadius, setMapRadius] = useState<number | "">(DEFAULT_MAP_RADIUS);
   return (
     <form
       className="m-4 max-w-sm"
@@ -64,7 +64,7 @@ export default function InputForm({ onSubmit }: Props) {
           showWaterFeatures: e.target["water-features-enabled"].checked,
           showParkFeatures: e.target["park-features-enabled"].checked,
           resolution,
-          radiusMeters: distance || DEFAULT_DISTANCE,
+          radiusMeters: mapRadius || DEFAULT_MAP_RADIUS,
         });
       }}
     >
@@ -100,31 +100,31 @@ export default function InputForm({ onSubmit }: Props) {
           <div className="flex items-center gap-3">
             <div className="flex-1">
               <Slider
-                min={MIN_DISTANCE}
-                max={MAX_DISTANCE}
-                step={DISTANCE_STEP}
-                value={[distance || 0]}
-                onValueChange={(v) => setDistance(v[0])}
+                min={MIN_MAP_RADIUS}
+                max={MAX_MAP_RADIUS}
+                step={MAP_RADIUS_STEP}
+                value={[mapRadius || 0]}
+                onValueChange={(v) => setMapRadius(v[0])}
               />
             </div>
             <div className="w-18">
               <Input
                 id="map-distance"
                 type="text"
-                value={distance}
+                value={mapRadius}
                 onChange={(e) => {
                   if (!e.target.value) {
-                    setDistance("");
+                    setMapRadius("");
                     return;
                   }
                   const val = Number(e.target.value);
                   if (Number.isNaN(val)) return;
-                  const clamped = Math.min(Math.max(val, 0), MAX_DISTANCE);
-                  setDistance(clamped);
+                  const clamped = Math.min(Math.max(val, 0), MAX_MAP_RADIUS);
+                  setMapRadius(clamped);
                 }}
                 onBlur={() => {
-                  if (distance === "" || distance < MIN_DISTANCE) {
-                    setDistance(MIN_DISTANCE);
+                  if (mapRadius === "" || mapRadius < MIN_MAP_RADIUS) {
+                    setMapRadius(MIN_MAP_RADIUS);
                   }
                 }}
               />
@@ -142,7 +142,6 @@ export default function InputForm({ onSubmit }: Props) {
                 </span>
               </CollapsibleTrigger>
               <CollapsibleContent className="bg-muted p-2">
-                <p></p>
                 <Table>
                   <TableHeader>
                     <TableRow>
