@@ -27,6 +27,21 @@ import {
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { useState } from "react";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { ChevronDown } from "lucide-react";
 
 type Props = {
   onSubmit: (config: GenerationConfig) => void;
@@ -115,6 +130,47 @@ export default function InputForm({ onSubmit }: Props) {
               />
             </div>
           </div>
+          <FieldDescription>
+            <Collapsible>
+              <CollapsibleTrigger asChild>
+                <span className="group hover:cursor-pointer">
+                  Radius Guide
+                  <ChevronDown
+                    size={16}
+                    className="mb-1 ml-1 inline-block group-data-[state=open]:rotate-180"
+                  />
+                </span>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="bg-muted p-2">
+                <p></p>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Radius (m)</TableHead>
+                      <TableHead>Best For</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell>4000-6000</TableCell>
+                      <TableCell>Small/dense cities</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell>8000-12000</TableCell>
+                      <TableCell>Medium cities, focused downtown</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell>15000-20000</TableCell>
+                      <TableCell>Large metros, full city view*</TableCell>
+                    </TableRow>
+                  </TableBody>
+                  <TableCaption className="pl-2 text-left">
+                    * Larger maps take longer to generate
+                  </TableCaption>
+                </Table>
+              </CollapsibleContent>
+            </Collapsible>
+          </FieldDescription>
         </Field>
         <Field orientation="horizontal">
           <Checkbox id="park-features" name="park-features-enabled" />
