@@ -19,6 +19,7 @@ import {
   DEFAULT_CUSTOM_RESOLUTION,
   MAX_CUSTOM_RESOLUTION,
   MIN_CUSTOM_RESOLUTION,
+  type NumberInput,
 } from "@/models/generation";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -45,8 +46,8 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { ChevronDown, XIcon } from "lucide-react";
-
-type NumberInput = number | "";
+import NumericInput from "@/components/numeric-input";
+import { numberOrDefault } from "@/lib/utils";
 
 type Props = {
   onSubmit: (config: GenerationConfig) => void;
@@ -77,11 +78,17 @@ export default function InputForm({ onSubmit }: Props) {
           resolution:
             resolutionType === "custom"
               ? {
-                  width: customWidth || DEFAULT_CUSTOM_RESOLUTION,
-                  height: customHeight || DEFAULT_CUSTOM_RESOLUTION,
+                  width: numberOrDefault(
+                    customWidth,
+                    DEFAULT_CUSTOM_RESOLUTION,
+                  ),
+                  height: numberOrDefault(
+                    customHeight,
+                    DEFAULT_CUSTOM_RESOLUTION,
+                  ),
                 }
               : resolutionMap[resolutionType].value,
-          radiusMeters: mapRadius || DEFAULT_MAP_RADIUS,
+          radiusMeters: numberOrDefault(mapRadius, DEFAULT_MAP_RADIUS),
         });
       }}
     >
@@ -118,62 +125,26 @@ export default function InputForm({ onSubmit }: Props) {
             <div className="grid grid-cols-[1fr_16px_1fr]">
               <Field>
                 <FieldLabel htmlFor="resolution-width">Width</FieldLabel>
-                <Input
+                <NumericInput
                   id="resolution-width"
-                  type="text"
                   value={customWidth}
-                  onChange={(e) => {
-                    if (!e.target.value) {
-                      setCustomWidth("");
-                      return;
-                    }
-                    const val = Number(e.target.value);
-                    if (Number.isNaN(val)) return;
-                    const clamped = Math.min(
-                      Math.max(val, 0),
-                      MAX_CUSTOM_RESOLUTION,
-                    );
-                    setCustomWidth(clamped);
-                  }}
-                  onBlur={() => {
-                    if (
-                      customWidth === "" ||
-                      customWidth < MIN_CUSTOM_RESOLUTION
-                    ) {
-                      setCustomWidth(MIN_CUSTOM_RESOLUTION);
-                    }
-                  }}
-                />
+                  setValue={setCustomWidth}
+                  maxValue={MAX_CUSTOM_RESOLUTION}
+                  minValue={MIN_CUSTOM_RESOLUTION}
+                  isFreeType
+                ></NumericInput>
               </Field>
               <XIcon size={16} className="mt-10.5" />
               <Field>
                 <FieldLabel htmlFor="resolution-height">Height</FieldLabel>
-                <Input
+                <NumericInput
                   id="resolution-height"
-                  type="text"
                   value={customHeight}
-                  onChange={(e) => {
-                    if (!e.target.value) {
-                      setCustomHeight("");
-                      return;
-                    }
-                    const val = Number(e.target.value);
-                    if (Number.isNaN(val)) return;
-                    const clamped = Math.min(
-                      Math.max(val, 0),
-                      MAX_CUSTOM_RESOLUTION,
-                    );
-                    setCustomHeight(clamped);
-                  }}
-                  onBlur={() => {
-                    if (
-                      customHeight === "" ||
-                      customHeight < MIN_CUSTOM_RESOLUTION
-                    ) {
-                      setCustomHeight(MIN_CUSTOM_RESOLUTION);
-                    }
-                  }}
-                />
+                  setValue={setCustomHeight}
+                  maxValue={MAX_CUSTOM_RESOLUTION}
+                  minValue={MIN_CUSTOM_RESOLUTION}
+                  isFreeType
+                ></NumericInput>
               </Field>
             </div>
           )}
@@ -186,31 +157,19 @@ export default function InputForm({ onSubmit }: Props) {
                 min={MIN_MAP_RADIUS}
                 max={MAX_MAP_RADIUS}
                 step={MAP_RADIUS_STEP}
-                value={[mapRadius || 0]}
+                value={[numberOrDefault(mapRadius, 0)]}
                 onValueChange={(v) => setMapRadius(v[0])}
               />
             </div>
             <div className="w-20">
-              <Input
+              <NumericInput
                 id="map-distance"
-                type="text"
                 value={mapRadius}
-                onChange={(e) => {
-                  if (!e.target.value) {
-                    setMapRadius("");
-                    return;
-                  }
-                  const val = Number(e.target.value);
-                  if (Number.isNaN(val)) return;
-                  const clamped = Math.min(Math.max(val, 0), MAX_MAP_RADIUS);
-                  setMapRadius(clamped);
-                }}
-                onBlur={() => {
-                  if (mapRadius === "" || mapRadius < MIN_MAP_RADIUS) {
-                    setMapRadius(MIN_MAP_RADIUS);
-                  }
-                }}
-              />
+                setValue={setMapRadius}
+                maxValue={MAX_MAP_RADIUS}
+                minValue={MIN_MAP_RADIUS}
+                isFreeType
+              ></NumericInput>
             </div>
           </div>
           <Collapsible className="text-muted-foreground text-sm">

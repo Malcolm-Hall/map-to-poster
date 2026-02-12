@@ -85,3 +85,5 @@ export type DisplayConfig = {
   subHeading: string;
   coordinates: string;
 };
+
+export type NumberInput = number | "" | "-";
