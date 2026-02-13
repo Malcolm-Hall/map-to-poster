@@ -2,6 +2,7 @@ import {
   Field,
   FieldContent,
   FieldDescription,
+  FieldError,
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field";
@@ -19,7 +20,7 @@ import {
   DEFAULT_CUSTOM_RESOLUTION,
   MAX_CUSTOM_RESOLUTION,
   MIN_CUSTOM_RESOLUTION,
-  type NumberInput,
+  resolutionTypes,
 } from "@/models/generation";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -30,7 +31,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { useState } from "react";
+import { useForm } from "@tanstack/react-form";
+import { z } from "zod";
 import {
   Table,
   TableBody,
@@ -46,184 +48,399 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { ChevronDown, XIcon } from "lucide-react";
-import NumericInput from "@/components/numeric-input";
-import { numberOrDefault } from "@/lib/utils";
+
+const formSchema = z
+  .object({
+    city: z.string().min(1, { message: "City is required" }),
+    country: z.string().min(1, { message: "Country is required" }),
+    resolutionType: z.enum(resolutionTypes),
+    customWidth: z.coerce
+      .number<string>({
+        error: (issue) => {
+          if (issue.code === "invalid_type") {
+            return "A valid width is required";
+          }
+        },
+      })
+      .int()
+      .min(MIN_CUSTOM_RESOLUTION, {
+        message: `Width must be at least ${MIN_CUSTOM_RESOLUTION}`,
+      })
+      .max(MAX_CUSTOM_RESOLUTION, {
+        message: `Width must be at most ${MAX_CUSTOM_RESOLUTION}`,
+      }),
+    customHeight: z.coerce
+      .number<string>({
+        error: (issue) => {
+          if (issue.code === "invalid_type") {
+            return "A valid height is required";
+          }
+        },
+      })
+      .int()
+      .min(MIN_CUSTOM_RESOLUTION, {
+        message: `Height must be at least ${MIN_CUSTOM_RESOLUTION}`,
+      })
+      .max(MAX_CUSTOM_RESOLUTION, {
+        message: `Height must be at most ${MAX_CUSTOM_RESOLUTION}`,
+      }),
+    mapRadius: z.coerce
+      .number<string>({
+        error: (issue) => {
+          if (issue.code === "invalid_type") {
+            return "A valid radius is required";
+          }
+        },
+      })
+      .min(MIN_MAP_RADIUS, {
+        message: `Radius must be at least ${MIN_MAP_RADIUS} meters`,
+      })
+      .max(MAX_MAP_RADIUS, {
+        message: `Radius must be at most ${MAX_MAP_RADIUS} meters`,
+      }),
+    showWaterFeatures: z.boolean(),
+    showParkFeatures: z.boolean(),
+  })
+  .superRefine((val, ctx) => {
+    if (val.resolutionType === "custom") {
+      if (val.customWidth === undefined) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Width is required for custom resolution",
+          path: ["customWidth"],
+        });
+      }
+      if (val.customHeight === undefined) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Height is required for custom resolution",
+          path: ["customHeight"],
+        });
+      }
+    }
+  });
 
 type Props = {
   onSubmit: (config: GenerationConfig) => void;
 };
 
-export default function InputForm({ onSubmit }: Props) {
-  const [mapRadius, setMapRadius] = useState<NumberInput>(DEFAULT_MAP_RADIUS);
-  const [resolutionType, setResolutionType] = useState<ResolutionType>(
-    resolutionOptions[0].key,
-  );
-  const [customWidth, setCustomWidth] = useState<NumberInput>(
-    DEFAULT_CUSTOM_RESOLUTION,
-  );
-  const [customHeight, setCustomHeight] = useState<NumberInput>(
-    DEFAULT_CUSTOM_RESOLUTION,
-  );
+export default function InputForm(props: Props) {
+  const form = useForm({
+    defaultValues: {
+      city: "",
+      country: "",
+      resolutionType: resolutionOptions[0].key,
+      customWidth: DEFAULT_CUSTOM_RESOLUTION.toString(),
+      customHeight: DEFAULT_CUSTOM_RESOLUTION.toString(),
+      mapRadius: DEFAULT_MAP_RADIUS.toString(),
+      showWaterFeatures: false,
+      showParkFeatures: false,
+    },
+    validators: {
+      onSubmit: formSchema,
+      onBlur: formSchema,
+    },
+    onSubmit: ({ value }) => {
+      const resolution =
+        value.resolutionType === "custom"
+          ? {
+              width: Number(value.customWidth),
+              height: Number(value.customHeight),
+            }
+          : resolutionMap[value.resolutionType].value;
+
+      props.onSubmit({
+        city: value.city,
+        country: value.country,
+        showWaterFeatures: value.showWaterFeatures,
+        showParkFeatures: value.showParkFeatures,
+        resolution,
+        radiusMeters: Number(value.mapRadius),
+      });
+    },
+  });
 
   return (
     <form
       className="m-4 max-w-sm"
       onSubmit={(e) => {
         e.preventDefault();
-        onSubmit({
-          city: e.target.city.value,
-          country: e.target.country.value,
-          showWaterFeatures: e.target["water-features-enabled"].checked,
-          showParkFeatures: e.target["park-features-enabled"].checked,
-          resolution:
-            resolutionType === "custom"
-              ? {
-                  width: numberOrDefault(
-                    customWidth,
-                    DEFAULT_CUSTOM_RESOLUTION,
-                  ),
-                  height: numberOrDefault(
-                    customHeight,
-                    DEFAULT_CUSTOM_RESOLUTION,
-                  ),
-                }
-              : resolutionMap[resolutionType].value,
-          radiusMeters: numberOrDefault(mapRadius, DEFAULT_MAP_RADIUS),
-        });
+        form.handleSubmit();
       }}
     >
       <FieldGroup>
-        <Field>
-          <FieldLabel htmlFor="city">City</FieldLabel>
-          <Input id="city" type="text" placeholder="New York" required />
-        </Field>
-        <Field>
-          <FieldLabel htmlFor="country">Country</FieldLabel>
-          <Input id="country" type="text" placeholder="USA" required />
-        </Field>
-        <FieldGroup>
-          <Field>
-            <FieldLabel htmlFor="resolution">Resolution</FieldLabel>
-            <Select
-              value={resolutionType}
-              onValueChange={(key: ResolutionType) => setResolutionType(key)}
-              name="poster-resolution"
-            >
-              <SelectTrigger id="resolution">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {resolutionOptions.map(({ name, key }) => (
-                  <SelectItem value={key} key={key}>
-                    {name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </Field>
-          {resolutionType === "custom" && (
-            <div className="grid grid-cols-[1fr_16px_1fr]">
-              <Field>
-                <FieldLabel htmlFor="resolution-width">Width</FieldLabel>
-                <NumericInput
-                  id="resolution-width"
-                  value={customWidth}
-                  setValue={setCustomWidth}
-                  maxValue={MAX_CUSTOM_RESOLUTION}
-                  minValue={MIN_CUSTOM_RESOLUTION}
-                  isFreeType
-                ></NumericInput>
-              </Field>
-              <XIcon size={16} className="mt-10.5" />
-              <Field>
-                <FieldLabel htmlFor="resolution-height">Height</FieldLabel>
-                <NumericInput
-                  id="resolution-height"
-                  value={customHeight}
-                  setValue={setCustomHeight}
-                  maxValue={MAX_CUSTOM_RESOLUTION}
-                  minValue={MIN_CUSTOM_RESOLUTION}
-                  isFreeType
-                ></NumericInput>
-              </Field>
-            </div>
-          )}
-        </FieldGroup>
-        <Field>
-          <FieldLabel htmlFor="map-distance">Map Radius (meters)</FieldLabel>
-          <div className="flex items-center gap-3">
-            <div className="flex-1">
-              <Slider
-                min={MIN_MAP_RADIUS}
-                max={MAX_MAP_RADIUS}
-                step={MAP_RADIUS_STEP}
-                value={[numberOrDefault(mapRadius, 0)]}
-                onValueChange={(v) => setMapRadius(v[0])}
-              />
-            </div>
-            <div className="w-20">
-              <NumericInput
-                id="map-distance"
-                value={mapRadius}
-                setValue={setMapRadius}
-                maxValue={MAX_MAP_RADIUS}
-                minValue={MIN_MAP_RADIUS}
-                isFreeType
-              ></NumericInput>
-            </div>
-          </div>
-          <Collapsible className="text-muted-foreground text-sm">
-            <CollapsibleTrigger asChild>
-              <span className="group hover:cursor-pointer">
-                Radius Guide
-                <ChevronDown
-                  size={16}
-                  className="mb-1 ml-1 inline-block group-data-[state=open]:rotate-180"
+        <form.Field
+          name="city"
+          children={(field) => {
+            const isInvalid =
+              field.state.meta.isTouched && !field.state.meta.isValid;
+            return (
+              <Field data-invalid={isInvalid}>
+                <FieldLabel htmlFor={field.name}>City</FieldLabel>
+                <Input
+                  id={field.name}
+                  name={field.name}
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                  aria-invalid={isInvalid}
+                  placeholder="New York"
+                  type="text"
                 />
-              </span>
-            </CollapsibleTrigger>
-            <CollapsibleContent className="bg-muted p-2">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Radius (m)</TableHead>
-                    <TableHead>Best For</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  <TableRow>
-                    <TableCell>4000-6000</TableCell>
-                    <TableCell>Small/dense cities</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>8000-12000</TableCell>
-                    <TableCell>Medium cities, focused downtown</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>15000-20000</TableCell>
-                    <TableCell>Large metros, full city view*</TableCell>
-                  </TableRow>
-                </TableBody>
-                <TableCaption className="pl-2 text-left">
-                  * Larger maps take longer to generate
-                </TableCaption>
-              </Table>
-            </CollapsibleContent>
-          </Collapsible>
-        </Field>
-        <Field orientation="horizontal">
-          <Checkbox id="park-features" name="park-features-enabled" />
-          <FieldLabel htmlFor="park-features">Enable Park Features</FieldLabel>
-        </Field>
-        <Field orientation="horizontal">
-          <Checkbox id="water-features" name="water-features-enabled" />
-          <FieldContent>
-            <FieldLabel htmlFor="water-features">
-              Enable Water Features
-            </FieldLabel>
-            <FieldDescription>Experimental</FieldDescription>
-          </FieldContent>
-        </Field>
+                {isInvalid && <FieldError errors={field.state.meta.errors} />}
+              </Field>
+            );
+          }}
+        />
+        <form.Field
+          name="country"
+          children={(field) => {
+            const isInvalid =
+              field.state.meta.isTouched && !field.state.meta.isValid;
+            return (
+              <Field data-invalid={isInvalid}>
+                <FieldLabel htmlFor={field.name}>Country</FieldLabel>
+                <Input
+                  id={field.name}
+                  name={field.name}
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                  aria-invalid={isInvalid}
+                  placeholder="USA"
+                  type="text"
+                />
+                {isInvalid && <FieldError errors={field.state.meta.errors} />}
+              </Field>
+            );
+          }}
+        />
+
+        <form.Field
+          name="resolutionType"
+          children={(field) => {
+            const isInvalid =
+              field.state.meta.isTouched && !field.state.meta.isValid;
+            return (
+              <FieldGroup>
+                <Field data-invalid={isInvalid}>
+                  <FieldLabel htmlFor={field.name}>
+                    Poster Resolution
+                  </FieldLabel>
+                  <Select
+                    name={field.name}
+                    value={field.state.value}
+                    onValueChange={(value: ResolutionType) =>
+                      field.handleChange(value)
+                    }
+                  >
+                    <SelectTrigger
+                      id="resolution-select"
+                      aria-invalid={isInvalid}
+                    >
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {resolutionOptions.map(({ name, key }) => (
+                        <SelectItem value={key} key={key}>
+                          {name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                </Field>
+                {field.state.value === "custom" && (
+                  <div className="grid grid-cols-[1fr_16px_1fr]">
+                    <form.Field
+                      name="customWidth"
+                      children={(field) => {
+                        const isInvalid =
+                          field.state.meta.isTouched &&
+                          !field.state.meta.isValid;
+                        return (
+                          <Field data-invalid={isInvalid}>
+                            <FieldLabel htmlFor={field.name}>Width</FieldLabel>
+                            <Input
+                              id={field.name}
+                              name={field.name}
+                              value={field.state.value}
+                              onBlur={field.handleBlur}
+                              onChange={(e) =>
+                                field.handleChange(e.target.value)
+                              }
+                              aria-invalid={isInvalid}
+                              type="text"
+                            />
+                            {isInvalid && (
+                              <FieldError errors={field.state.meta.errors} />
+                            )}
+                          </Field>
+                        );
+                      }}
+                    />
+                    <XIcon size={16} className="mt-10.5" />
+                    <form.Field
+                      name="customHeight"
+                      children={(field) => {
+                        const isInvalid =
+                          field.state.meta.isTouched &&
+                          !field.state.meta.isValid;
+                        return (
+                          <Field data-invalid={isInvalid}>
+                            <FieldLabel htmlFor={field.name}>Height</FieldLabel>
+                            <Input
+                              id={field.name}
+                              name={field.name}
+                              value={field.state.value}
+                              onBlur={field.handleBlur}
+                              onChange={(e) =>
+                                field.handleChange(e.target.value)
+                              }
+                              aria-invalid={isInvalid}
+                              type="text"
+                            />
+                            {isInvalid && (
+                              <FieldError errors={field.state.meta.errors} />
+                            )}
+                          </Field>
+                        );
+                      }}
+                    />
+                  </div>
+                )}
+              </FieldGroup>
+            );
+          }}
+        />
+
+        <form.Field
+          name="mapRadius"
+          children={(field) => {
+            const isInvalid =
+              field.state.meta.isTouched && !field.state.meta.isValid;
+            const valueNumeric = Number(field.state.value);
+            return (
+              <Field data-invalid={isInvalid}>
+                <FieldLabel htmlFor={field.name}>
+                  Map Radius (meters)
+                </FieldLabel>
+                <div className="flex items-center gap-3">
+                  <div className="flex-1">
+                    <Slider
+                      min={MIN_MAP_RADIUS}
+                      max={MAX_MAP_RADIUS}
+                      step={MAP_RADIUS_STEP}
+                      value={[Number.isNaN(valueNumeric) ? 0 : valueNumeric]}
+                      onValueChange={(v) => field.handleChange(v[0].toString())}
+                    />
+                  </div>
+                  <div className="w-20">
+                    <Input
+                      id={field.name}
+                      name={field.name}
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      aria-invalid={isInvalid}
+                      type="text"
+                    />
+                  </div>
+                </div>
+                {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                <Collapsible className="text-muted-foreground text-sm">
+                  <CollapsibleTrigger asChild>
+                    <span className="group hover:cursor-pointer">
+                      Radius Guide
+                      <ChevronDown
+                        size={16}
+                        className="mb-1 ml-1 inline-block group-data-[state=open]:rotate-180"
+                      />
+                    </span>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="bg-muted p-2">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Radius (m)</TableHead>
+                          <TableHead>Best For</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        <TableRow>
+                          <TableCell>4000-6000</TableCell>
+                          <TableCell>Small/dense cities</TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell>8000-12000</TableCell>
+                          <TableCell>Medium cities, focused downtown</TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell>15000-20000</TableCell>
+                          <TableCell>Large metros, full city view*</TableCell>
+                        </TableRow>
+                      </TableBody>
+                      <TableCaption className="pl-2 text-left">
+                        * Larger maps take longer to generate
+                      </TableCaption>
+                    </Table>
+                  </CollapsibleContent>
+                </Collapsible>
+              </Field>
+            );
+          }}
+        />
+
+        <form.Field
+          name="showParkFeatures"
+          children={(field) => {
+            const isInvalid =
+              field.state.meta.isTouched && !field.state.meta.isValid;
+            return (
+              <Field orientation="horizontal" data-invalid={isInvalid}>
+                <Checkbox
+                  id={field.name}
+                  name={field.name}
+                  aria-invalid={isInvalid}
+                  checked={field.state.value}
+                  onCheckedChange={(v) => field.handleChange(v as boolean)}
+                />
+                <FieldContent>
+                  <FieldLabel htmlFor={field.name}>
+                    Enable Park Features
+                  </FieldLabel>
+                  {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                </FieldContent>
+              </Field>
+            );
+          }}
+        />
+        <form.Field
+          name="showWaterFeatures"
+          children={(field) => {
+            const isInvalid =
+              field.state.meta.isTouched && !field.state.meta.isValid;
+            return (
+              <Field orientation="horizontal" data-invalid={isInvalid}>
+                <Checkbox
+                  id={field.name}
+                  name={field.name}
+                  aria-invalid={isInvalid}
+                  checked={field.state.value}
+                  onCheckedChange={(v) => field.handleChange(v as boolean)}
+                />
+                <FieldContent>
+                  <FieldLabel htmlFor={field.name}>
+                    Enable Water Features
+                  </FieldLabel>
+                  <FieldDescription>Experimental</FieldDescription>
+                  {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                </FieldContent>
+              </Field>
+            );
+          }}
+        />
+
         <Field orientation="horizontal">
           <Button type="submit">Generate</Button>
         </Field>

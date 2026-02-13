@@ -49,6 +49,7 @@ export const resolutionOptions = Object.entries(resolutionMap).map(
 ) as {
   [K in ResolutionType]: { key: K } & (typeof resolutionMap)[K];
 }[ResolutionType][];
+export const resolutionTypes = Object.keys(resolutionMap) as ResolutionType[];
 
 export type GenerationConfig = {
   city: string;
