@@ -119,7 +119,7 @@ export default function OutputPanel({ config }: Props) {
         parkElements={config.showParkFeatures ? (parkQuery.data ?? []) : []}
         bbox={bbox}
         resolution={config.resolution}
-        displayConfig={formatPosterText(locationQuery.data)}
+        displayConfig={formatPosterText(locationQuery.data, config.textConfig)}
       />
     </div>
   );

@@ -93,12 +93,18 @@ export type CoordinateLookup = {
 
 export type Lookup = CityLookup | CoordinateLookup;
 
+export type TextConfig = {
+  customCityText: string;
+  customCountryText: string;
+};
+
 export type GenerationConfig = {
   lookup: Lookup;
   resolution: PosterResolution;
   radiusMeters: number;
   showWaterFeatures?: boolean;
   showParkFeatures?: boolean;
+  textConfig: TextConfig;
 };
 
 export type DisplayConfig = {

@@ -104,6 +104,8 @@ const baseSchema = z.object({
     }),
   showWaterFeatures: z.boolean(),
   showParkFeatures: z.boolean(),
+  customCityText: z.string(),
+  customCountryText: z.string(),
 });
 
 const citySchema = baseSchema.extend({
@@ -171,6 +173,8 @@ export default function InputForm(props: Props) {
       mapRadius: DEFAULT_MAP_RADIUS.toString(),
       showWaterFeatures: false,
       showParkFeatures: false,
+      customCityText: "",
+      customCountryText: "",
     },
     validators: {
       onSubmit: formSchema,
@@ -207,6 +211,10 @@ export default function InputForm(props: Props) {
         showParkFeatures: value.showParkFeatures,
         resolution,
         radiusMeters: Number(value.mapRadius),
+        textConfig: {
+          customCityText: value.customCityText,
+          customCountryText: value.customCountryText,
+        },
       });
     },
   });
@@ -273,7 +281,7 @@ export default function InputForm(props: Props) {
                             onBlur={field.handleBlur}
                             onChange={(e) => field.handleChange(e.target.value)}
                             aria-invalid={isInvalid}
-                            placeholder="USA"
+                            placeholder="United States"
                             type="text"
                           />
                           {isInvalid && (
@@ -567,6 +575,76 @@ export default function InputForm(props: Props) {
             );
           }}
         />
+
+        <Collapsible>
+          <CollapsibleTrigger asChild>
+            <span className="group hover:cursor-pointer">
+              Advanced Options
+              <ChevronDown
+                size={16}
+                className="mb-1 ml-1 inline-block group-data-[state=open]:rotate-180"
+              />
+            </span>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="mt-4">
+            <FieldGroup>
+              <form.Field
+                name="customCityText"
+                children={(field) => {
+                  const isInvalid =
+                    field.state.meta.isTouched && !field.state.meta.isValid;
+                  return (
+                    <Field data-invalid={isInvalid}>
+                      <FieldLabel htmlFor={field.name}>
+                        Custom City Text
+                      </FieldLabel>
+                      <Input
+                        id={field.name}
+                        name={field.name}
+                        value={field.state.value}
+                        onBlur={field.handleBlur}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        aria-invalid={isInvalid}
+                        placeholder="NYC"
+                        type="text"
+                      />
+                      {isInvalid && (
+                        <FieldError errors={field.state.meta.errors} />
+                      )}
+                    </Field>
+                  );
+                }}
+              />
+              <form.Field
+                name="customCountryText"
+                children={(field) => {
+                  const isInvalid =
+                    field.state.meta.isTouched && !field.state.meta.isValid;
+                  return (
+                    <Field data-invalid={isInvalid}>
+                      <FieldLabel htmlFor={field.name}>
+                        Custom Country Text
+                      </FieldLabel>
+                      <Input
+                        id={field.name}
+                        name={field.name}
+                        value={field.state.value}
+                        onBlur={field.handleBlur}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        aria-invalid={isInvalid}
+                        placeholder="USA"
+                        type="text"
+                      />
+                      {isInvalid && (
+                        <FieldError errors={field.state.meta.errors} />
+                      )}
+                    </Field>
+                  );
+                }}
+              />
+            </FieldGroup>
+          </CollapsibleContent>
+        </Collapsible>
 
         <Field orientation="horizontal">
           <Button type="submit">Generate</Button>
