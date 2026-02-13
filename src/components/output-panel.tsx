@@ -1,4 +1,3 @@
-import { search } from "@/lib/nominatim";
 import {
   fetchMapData,
   bboxFromPoint,
@@ -10,21 +9,17 @@ import { useQuery } from "@tanstack/react-query";
 import MapCanvas from "./map-canvas";
 import { formatCoordinates } from "@/lib/utils";
 import type { GeometryElement } from "@/models/osm";
+import useLocationQuery from "@/hooks/useLocationQuery";
 
 type Props = {
   config: GenerationConfig;
 };
 
 export default function OutputPanel({ config }: Props) {
-  const locationQuery = useQuery({
-    queryKey: ["nominatim", config.city, config.country],
-    queryFn: () => search(config.city, config.country),
-  });
+  const locationQuery = useLocationQuery(config.lookup);
 
-  const lat = parseFloat(locationQuery.data?.lat ?? "0");
-  const lon = parseFloat(locationQuery.data?.lon ?? "0");
   const bbox = bboxFromPoint(
-    { lat, lon },
+    locationQuery.data ?? { lat: 0, lon: 0 },
     config.radiusMeters,
     config.resolution,
   );
@@ -116,7 +111,7 @@ export default function OutputPanel({ config }: Props) {
   return (
     <div className="p-4">
       <h2 className="mb-4 text-2xl font-bold">
-        {config.city}, {config.country}
+        {locationQuery.data.city}, {locationQuery.data.country}
       </h2>
       <MapCanvas
         elements={mapQuery.data}
@@ -125,9 +120,12 @@ export default function OutputPanel({ config }: Props) {
         bbox={bbox}
         resolution={config.resolution}
         displayConfig={{
-          mainHeading: config.city,
-          subHeading: config.country,
-          coordinates: formatCoordinates(lat, lon),
+          mainHeading: locationQuery.data.city,
+          subHeading: locationQuery.data.country,
+          coordinates: formatCoordinates(
+            locationQuery.data.lat,
+            locationQuery.data.lon,
+          ),
         }}
       />
     </div>

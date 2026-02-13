@@ -51,19 +51,17 @@ export const resolutionOptions = Object.entries(resolutionMap).map(
 }[ResolutionType][];
 export const resolutionTypes = Object.keys(resolutionMap) as ResolutionType[];
 
-export type GenerationConfig = {
-  city: string;
-  country: string;
-  resolution: PosterResolution;
-  radiusMeters: number;
-  showWaterFeatures?: boolean;
-  showParkFeatures?: boolean;
-};
-
 export const MIN_MAP_RADIUS = 1000;
 export const MAX_MAP_RADIUS = 20_000;
 export const DEFAULT_MAP_RADIUS = 2000;
 export const MAP_RADIUS_STEP = 100;
+
+export type LookupType = "location" | "coordinates";
+
+export const MIN_LATITUDE = -90;
+export const MAX_LATITUDE = 90;
+export const MIN_LONGITUDE = -180;
+export const MAX_LONGITUDE = 180;
 
 export const THEME = {
   background: "#151515",
@@ -81,10 +79,30 @@ export const THEME = {
   gradient: "#ffffff",
 };
 
+export type LocationLookup = {
+  type: Extract<LookupType, "location">;
+  city: string;
+  country: string;
+};
+
+export type CoordinateLookup = {
+  type: Extract<LookupType, "coordinates">;
+  latitude: number;
+  longitude: number;
+};
+
+export type Lookup = LocationLookup | CoordinateLookup;
+
+export type GenerationConfig = {
+  lookup: Lookup;
+  resolution: PosterResolution;
+  radiusMeters: number;
+  showWaterFeatures?: boolean;
+  showParkFeatures?: boolean;
+};
+
 export type DisplayConfig = {
   mainHeading: string;
   subHeading: string;
   coordinates: string;
 };
-
-export type NumberInput = number | "" | "-";

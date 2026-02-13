@@ -1,4 +1,3 @@
-import type { NumberInput } from "@/models/generation";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -16,14 +15,4 @@ export function radToDeg(angleRad: number): number {
 
 export function degToRad(angleDeg: number): number {
   return (angleDeg * Math.PI) / 180;
-}
-
-export function numberOrDefault(
-  input: NumberInput,
-  defaultValue: number,
-): number {
-  if (input === "" || input === "-") {
-    return defaultValue;
-  }
-  return input;
 }

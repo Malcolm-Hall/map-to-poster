@@ -21,6 +21,12 @@ import {
   MAX_CUSTOM_RESOLUTION,
   MIN_CUSTOM_RESOLUTION,
   resolutionTypes,
+  MIN_LATITUDE,
+  MAX_LATITUDE,
+  MIN_LONGITUDE,
+  MAX_LONGITUDE,
+  type LookupType,
+  type Lookup,
 } from "@/models/generation";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -48,77 +54,104 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { ChevronDown, XIcon } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-const formSchema = z
-  .object({
-    city: z.string().min(1, { message: "City is required" }),
-    country: z.string().min(1, { message: "Country is required" }),
-    resolutionType: z.enum(resolutionTypes),
-    customWidth: z.coerce
-      .number<string>({
-        error: (issue) => {
-          if (issue.code === "invalid_type") {
-            return "A valid width is required";
-          }
-        },
-      })
-      .int()
-      .min(MIN_CUSTOM_RESOLUTION, {
-        message: `Width must be at least ${MIN_CUSTOM_RESOLUTION}`,
-      })
-      .max(MAX_CUSTOM_RESOLUTION, {
-        message: `Width must be at most ${MAX_CUSTOM_RESOLUTION}`,
-      }),
-    customHeight: z.coerce
-      .number<string>({
-        error: (issue) => {
-          if (issue.code === "invalid_type") {
-            return "A valid height is required";
-          }
-        },
-      })
-      .int()
-      .min(MIN_CUSTOM_RESOLUTION, {
-        message: `Height must be at least ${MIN_CUSTOM_RESOLUTION}`,
-      })
-      .max(MAX_CUSTOM_RESOLUTION, {
-        message: `Height must be at most ${MAX_CUSTOM_RESOLUTION}`,
-      }),
-    mapRadius: z.coerce
-      .number<string>({
-        error: (issue) => {
-          if (issue.code === "invalid_type") {
-            return "A valid radius is required";
-          }
-        },
-      })
-      .min(MIN_MAP_RADIUS, {
-        message: `Radius must be at least ${MIN_MAP_RADIUS} meters`,
-      })
-      .max(MAX_MAP_RADIUS, {
-        message: `Radius must be at most ${MAX_MAP_RADIUS} meters`,
-      }),
-    showWaterFeatures: z.boolean(),
-    showParkFeatures: z.boolean(),
-  })
-  .superRefine((val, ctx) => {
-    if (val.resolutionType === "custom") {
-      if (val.customWidth === undefined) {
-        ctx.addIssue({
-          code: "custom",
-          message: "Width is required for custom resolution",
-          path: ["customWidth"],
-        });
-      }
-      if (val.customHeight === undefined) {
-        ctx.addIssue({
-          code: "custom",
-          message: "Height is required for custom resolution",
-          path: ["customHeight"],
-        });
-      }
-    }
-  });
+const baseSchema = z.object({
+  resolutionType: z.literal(resolutionTypes),
+  customWidth: z.coerce
+    .number<string>({
+      error: (issue) => {
+        if (issue.code === "invalid_type") {
+          return "A valid width is required";
+        }
+      },
+    })
+    .int()
+    .min(MIN_CUSTOM_RESOLUTION, {
+      message: `Width must be at least ${MIN_CUSTOM_RESOLUTION}`,
+    })
+    .max(MAX_CUSTOM_RESOLUTION, {
+      message: `Width must be at most ${MAX_CUSTOM_RESOLUTION}`,
+    }),
+  customHeight: z.coerce
+    .number<string>({
+      error: (issue) => {
+        if (issue.code === "invalid_type") {
+          return "A valid height is required";
+        }
+      },
+    })
+    .int()
+    .min(MIN_CUSTOM_RESOLUTION, {
+      message: `Height must be at least ${MIN_CUSTOM_RESOLUTION}`,
+    })
+    .max(MAX_CUSTOM_RESOLUTION, {
+      message: `Height must be at most ${MAX_CUSTOM_RESOLUTION}`,
+    }),
+  mapRadius: z.coerce
+    .number<string>({
+      error: (issue) => {
+        if (issue.code === "invalid_type") {
+          return "A valid radius is required";
+        }
+      },
+    })
+    .min(MIN_MAP_RADIUS, {
+      message: `Radius must be at least ${MIN_MAP_RADIUS} meters`,
+    })
+    .max(MAX_MAP_RADIUS, {
+      message: `Radius must be at most ${MAX_MAP_RADIUS} meters`,
+    }),
+  showWaterFeatures: z.boolean(),
+  showParkFeatures: z.boolean(),
+});
+
+const locationSchema = baseSchema.extend({
+  lookupType: z.literal("location"),
+  city: z.string().trim().min(1, { message: "City is required" }),
+  country: z.string().trim().min(1, { message: "Country is required" }),
+  latitude: z.coerce.number<string>(),
+  longitude: z.coerce.number<string>(),
+});
+
+const coordinateSchema = baseSchema.extend({
+  lookupType: z.literal("coordinates"),
+  city: z.string(),
+  country: z.string(),
+  latitude: z.coerce
+    .number<string>({
+      error: (issue) => {
+        if (issue.code === "invalid_type") {
+          return "A valid latitude is required";
+        }
+      },
+    })
+    .min(MIN_LATITUDE, {
+      message: `Latitude must be at least ${MIN_LATITUDE}`,
+    })
+    .max(MAX_LATITUDE, {
+      message: `Latitude must be at most ${MAX_LATITUDE}`,
+    }),
+  longitude: z.coerce
+    .number<string>({
+      error: (issue) => {
+        if (issue.code === "invalid_type") {
+          return "A valid longitude is required";
+        }
+      },
+    })
+    .min(MIN_LONGITUDE, {
+      message: `Longitude must be at least ${MIN_LONGITUDE}`,
+    })
+    .max(MAX_LONGITUDE, {
+      message: `Longitude must be at most ${MAX_LONGITUDE}`,
+    }),
+});
+
+const formSchema = z.discriminatedUnion("lookupType", [
+  locationSchema,
+  coordinateSchema,
+]);
 
 type Props = {
   onSubmit: (config: GenerationConfig) => void;
@@ -127,8 +160,11 @@ type Props = {
 export default function InputForm(props: Props) {
   const form = useForm({
     defaultValues: {
+      lookupType: "location" as LookupType,
       city: "",
       country: "",
+      latitude: "",
+      longitude: "",
       resolutionType: resolutionOptions[0].key,
       customWidth: DEFAULT_CUSTOM_RESOLUTION.toString(),
       customHeight: DEFAULT_CUSTOM_RESOLUTION.toString(),
@@ -149,9 +185,23 @@ export default function InputForm(props: Props) {
             }
           : resolutionMap[value.resolutionType].value;
 
+      let lookup: Lookup;
+      if (value.lookupType === "location") {
+        lookup = {
+          type: value.lookupType,
+          city: value.city,
+          country: value.country,
+        };
+      } else {
+        lookup = {
+          type: value.lookupType,
+          longitude: Number(value.longitude),
+          latitude: Number(value.latitude),
+        };
+      }
+
       props.onSubmit({
-        city: value.city,
-        country: value.country,
+        lookup,
         showWaterFeatures: value.showWaterFeatures,
         showParkFeatures: value.showParkFeatures,
         resolution,
@@ -170,50 +220,126 @@ export default function InputForm(props: Props) {
     >
       <FieldGroup>
         <form.Field
-          name="city"
-          children={(field) => {
-            const isInvalid =
-              field.state.meta.isTouched && !field.state.meta.isValid;
-            return (
-              <Field data-invalid={isInvalid}>
-                <FieldLabel htmlFor={field.name}>City</FieldLabel>
-                <Input
-                  id={field.name}
-                  name={field.name}
-                  value={field.state.value}
-                  onBlur={field.handleBlur}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  aria-invalid={isInvalid}
-                  placeholder="New York"
-                  type="text"
-                />
-                {isInvalid && <FieldError errors={field.state.meta.errors} />}
-              </Field>
-            );
-          }}
-        />
-        <form.Field
-          name="country"
-          children={(field) => {
-            const isInvalid =
-              field.state.meta.isTouched && !field.state.meta.isValid;
-            return (
-              <Field data-invalid={isInvalid}>
-                <FieldLabel htmlFor={field.name}>Country</FieldLabel>
-                <Input
-                  id={field.name}
-                  name={field.name}
-                  value={field.state.value}
-                  onBlur={field.handleBlur}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  aria-invalid={isInvalid}
-                  placeholder="USA"
-                  type="text"
-                />
-                {isInvalid && <FieldError errors={field.state.meta.errors} />}
-              </Field>
-            );
-          }}
+          name="lookupType"
+          children={(field) => (
+            <Tabs
+              value={field.state.value}
+              onValueChange={(value) => field.handleChange(value as LookupType)}
+            >
+              <TabsList variant="line">
+                <TabsTrigger value="location">Location</TabsTrigger>
+                <TabsTrigger value="coordinates">Coordinates</TabsTrigger>
+              </TabsList>
+              <TabsContent value="location">
+                <FieldGroup>
+                  <form.Field
+                    name="city"
+                    children={(field) => {
+                      const isInvalid =
+                        field.state.meta.isTouched && !field.state.meta.isValid;
+                      return (
+                        <Field data-invalid={isInvalid}>
+                          <FieldLabel htmlFor={field.name}>City</FieldLabel>
+                          <Input
+                            id={field.name}
+                            name={field.name}
+                            value={field.state.value}
+                            onBlur={field.handleBlur}
+                            onChange={(e) => field.handleChange(e.target.value)}
+                            aria-invalid={isInvalid}
+                            placeholder="New York"
+                            type="text"
+                          />
+                          {isInvalid && (
+                            <FieldError errors={field.state.meta.errors} />
+                          )}
+                        </Field>
+                      );
+                    }}
+                  />
+                  <form.Field
+                    name="country"
+                    children={(field) => {
+                      const isInvalid =
+                        field.state.meta.isTouched && !field.state.meta.isValid;
+                      return (
+                        <Field data-invalid={isInvalid}>
+                          <FieldLabel htmlFor={field.name}>Country</FieldLabel>
+                          <Input
+                            id={field.name}
+                            name={field.name}
+                            value={field.state.value}
+                            onBlur={field.handleBlur}
+                            onChange={(e) => field.handleChange(e.target.value)}
+                            aria-invalid={isInvalid}
+                            placeholder="USA"
+                            type="text"
+                          />
+                          {isInvalid && (
+                            <FieldError errors={field.state.meta.errors} />
+                          )}
+                        </Field>
+                      );
+                    }}
+                  />
+                </FieldGroup>
+              </TabsContent>
+              <TabsContent value="coordinates">
+                <FieldGroup>
+                  <form.Field
+                    name="latitude"
+                    children={(field) => {
+                      const isInvalid =
+                        field.state.meta.isTouched && !field.state.meta.isValid;
+                      return (
+                        <Field data-invalid={isInvalid}>
+                          <FieldLabel htmlFor={field.name}>Latitude</FieldLabel>
+                          <Input
+                            id={field.name}
+                            name={field.name}
+                            value={field.state.value}
+                            onBlur={field.handleBlur}
+                            onChange={(e) => field.handleChange(e.target.value)}
+                            aria-invalid={isInvalid}
+                            type="text"
+                          />
+                          {isInvalid && (
+                            <FieldError errors={field.state.meta.errors} />
+                          )}
+                        </Field>
+                      );
+                    }}
+                  />
+                  <form.Field
+                    name="longitude"
+                    children={(field) => {
+                      const isInvalid =
+                        field.state.meta.isTouched && !field.state.meta.isValid;
+                      return (
+                        <Field data-invalid={isInvalid}>
+                          <FieldLabel htmlFor={field.name}>
+                            Longitude
+                          </FieldLabel>
+                          <Input
+                            id={field.name}
+                            name={field.name}
+                            value={field.state.value}
+                            onBlur={field.handleBlur}
+                            onChange={(e) => field.handleChange(e.target.value)}
+                            aria-invalid={isInvalid}
+                            type="text"
+                          />
+                          {isInvalid && (
+                            <FieldError errors={field.state.meta.errors} />
+                          )}
+                        </Field>
+                      );
+                    }}
+                  />
+                </FieldGroup>
+              </TabsContent>
+            </Tabs>
+          )}
         />
 
         <form.Field

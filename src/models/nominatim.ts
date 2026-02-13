@@ -1,5 +1,9 @@
 export type NominatimPlace = {
   addresstype: string;
+  address: {
+    city: string;
+    country: string;
+  };
   boundingbox: string[];
   category: string;
   display_name: string;
