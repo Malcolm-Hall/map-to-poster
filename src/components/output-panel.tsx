@@ -7,9 +7,9 @@ import {
 import { type GenerationConfig } from "@/models/generation";
 import { useQuery } from "@tanstack/react-query";
 import MapCanvas from "./map-canvas";
-import { formatCoordinates } from "@/lib/utils";
 import type { GeometryElement } from "@/models/osm";
 import useLocationQuery from "@/hooks/useLocationQuery";
+import { formatPosterText } from "@/lib/utils";
 
 type Props = {
   config: GenerationConfig;
@@ -119,14 +119,7 @@ export default function OutputPanel({ config }: Props) {
         parkElements={config.showParkFeatures ? (parkQuery.data ?? []) : []}
         bbox={bbox}
         resolution={config.resolution}
-        displayConfig={{
-          mainHeading: locationQuery.data.city,
-          subHeading: locationQuery.data.country,
-          coordinates: formatCoordinates(
-            locationQuery.data.lat,
-            locationQuery.data.lon,
-          ),
-        }}
+        displayConfig={formatPosterText(locationQuery.data)}
       />
     </div>
   );

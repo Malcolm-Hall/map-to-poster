@@ -124,29 +124,43 @@ export function renderMapPoster(
     gradientSize,
   );
 
+  const mainFontSize = 80;
+  const subFontSize = 36;
+  const coordFontSize = 20;
+  const font = "sans-serif";
+  const textGap = 20;
+  const textStartY = (resolution.height * 3) / 4;
+  let textY = textStartY;
+
   // Text overlay
   ctx.fillStyle = THEME.text;
   ctx.textAlign = "center";
-  ctx.font = "bold 64px sans-serif";
-  ctx.fillText(
-    options.mainHeading,
-    resolution.width / 2,
-    resolution.height - 120,
-  );
+  ctx.font = `bold ${mainFontSize}px ${font}`;
+  ctx.fillText(options.mainHeading, resolution.width / 2, textY);
 
-  ctx.font = "32px sans-serif";
-  ctx.fillText(
-    options.subHeading,
-    resolution.width / 2,
-    resolution.height - 70,
-  );
+  textY += textGap;
 
-  ctx.font = "24px sans-serif";
-  ctx.fillText(
-    options.coordinates,
-    resolution.width / 2,
-    resolution.height - 30,
-  );
+  // Gap for divider
+
+  textY += textGap - 10 + subFontSize;
+
+  ctx.font = `${subFontSize}px ${font}`;
+  ctx.fillText(options.subHeading, resolution.width / 2, textY);
+
+  textY += textGap + coordFontSize;
+
+  ctx.font = `${coordFontSize}px ${font}`;
+  const coordTextMetrics = ctx.measureText(options.coordinates);
+  ctx.fillText(options.coordinates, resolution.width / 2, textY);
+
+  // Divider
+  const dividerLength = coordTextMetrics.width * 1.15;
+  ctx.strokeStyle = THEME.text;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo((resolution.width - dividerLength) / 2, textStartY + textGap);
+  ctx.lineTo((resolution.width + dividerLength) / 2, textStartY + textGap);
+  ctx.stroke();
 }
 
 export function exportCanvasAsPNG(

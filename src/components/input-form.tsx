@@ -106,8 +106,8 @@ const baseSchema = z.object({
   showParkFeatures: z.boolean(),
 });
 
-const locationSchema = baseSchema.extend({
-  lookupType: z.literal("location"),
+const citySchema = baseSchema.extend({
+  lookupType: z.literal("city"),
   city: z.string().trim().min(1, { message: "City is required" }),
   country: z.string().trim().min(1, { message: "Country is required" }),
   latitude: z.coerce.number<string>(),
@@ -149,7 +149,7 @@ const coordinateSchema = baseSchema.extend({
 });
 
 const formSchema = z.discriminatedUnion("lookupType", [
-  locationSchema,
+  citySchema,
   coordinateSchema,
 ]);
 
@@ -160,7 +160,7 @@ type Props = {
 export default function InputForm(props: Props) {
   const form = useForm({
     defaultValues: {
-      lookupType: "location" as LookupType,
+      lookupType: "city" as LookupType,
       city: "",
       country: "",
       latitude: "",
@@ -176,7 +176,8 @@ export default function InputForm(props: Props) {
       onSubmit: formSchema,
       onBlur: formSchema,
     },
-    onSubmit: ({ value }) => {
+    onSubmit: (data) => {
+      const value = formSchema.parse(data.value);
       const resolution =
         value.resolutionType === "custom"
           ? {
@@ -186,7 +187,7 @@ export default function InputForm(props: Props) {
           : resolutionMap[value.resolutionType].value;
 
       let lookup: Lookup;
-      if (value.lookupType === "location") {
+      if (value.lookupType === "city") {
         lookup = {
           type: value.lookupType,
           city: value.city,
@@ -227,10 +228,10 @@ export default function InputForm(props: Props) {
               onValueChange={(value) => field.handleChange(value as LookupType)}
             >
               <TabsList variant="line">
-                <TabsTrigger value="location">Location</TabsTrigger>
+                <TabsTrigger value="city">Location</TabsTrigger>
                 <TabsTrigger value="coordinates">Coordinates</TabsTrigger>
               </TabsList>
-              <TabsContent value="location">
+              <TabsContent value="city">
                 <FieldGroup>
                   <form.Field
                     name="city"

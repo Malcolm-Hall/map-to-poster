@@ -56,13 +56,6 @@ export const MAX_MAP_RADIUS = 20_000;
 export const DEFAULT_MAP_RADIUS = 2000;
 export const MAP_RADIUS_STEP = 100;
 
-export type LookupType = "location" | "coordinates";
-
-export const MIN_LATITUDE = -90;
-export const MAX_LATITUDE = 90;
-export const MIN_LONGITUDE = -180;
-export const MAX_LONGITUDE = 180;
-
 export const THEME = {
   background: "#151515",
   water: "#1f4e79",
@@ -79,8 +72,15 @@ export const THEME = {
   gradient: "#ffffff",
 };
 
-export type LocationLookup = {
-  type: Extract<LookupType, "location">;
+export const MIN_LATITUDE = -90;
+export const MAX_LATITUDE = 90;
+export const MIN_LONGITUDE = -180;
+export const MAX_LONGITUDE = 180;
+
+export type LookupType = "city" | "coordinates";
+
+export type CityLookup = {
+  type: Extract<LookupType, "city">;
   city: string;
   country: string;
 };
@@ -91,7 +91,7 @@ export type CoordinateLookup = {
   longitude: number;
 };
 
-export type Lookup = LocationLookup | CoordinateLookup;
+export type Lookup = CityLookup | CoordinateLookup;
 
 export type GenerationConfig = {
   lookup: Lookup;

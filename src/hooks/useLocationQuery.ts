@@ -1,22 +1,25 @@
 import { citySearch, coordinateSearch } from "@/lib/nominatim";
-import type {
-  CoordinateLookup,
-  LocationLookup,
-  Lookup,
-} from "@/models/generation";
+import type { CoordinateLookup, CityLookup, Lookup } from "@/models/generation";
 import { useQuery } from "@tanstack/react-query";
 
-export default function useLocationQuery(lookup: Lookup) {
-  const isLocationLookup = lookup.type === "location";
+export type Location = {
+  city: string;
+  country: string;
+  lat: number;
+  lon: number;
+};
 
-  const locationQuery = useQuery({
+export default function useLocationQuery(lookup: Lookup) {
+  const isCityLookup = lookup.type === "city";
+
+  const cityQuery = useQuery<Location>({
     queryKey: [
       "nominatim",
       "search",
-      isLocationLookup ? [lookup.city, lookup.country] : [],
+      isCityLookup ? [lookup.city, lookup.country] : [],
     ],
     queryFn: async () => {
-      const config = lookup as LocationLookup;
+      const config = lookup as CityLookup;
       const place = await citySearch(config.city, config.country);
       return {
         lat: parseFloat(place.lat),
@@ -25,14 +28,14 @@ export default function useLocationQuery(lookup: Lookup) {
         country: place.address.country,
       };
     },
-    enabled: isLocationLookup,
+    enabled: isCityLookup,
   });
 
-  const coordinateQuery = useQuery({
+  const coordinateQuery = useQuery<Location>({
     queryKey: [
       "nominatim",
       "reverse",
-      !isLocationLookup ? [lookup.latitude, lookup.longitude] : [],
+      !isCityLookup ? [lookup.latitude, lookup.longitude] : [],
     ],
     queryFn: async () => {
       const config = lookup as CoordinateLookup;
@@ -44,11 +47,11 @@ export default function useLocationQuery(lookup: Lookup) {
         country: place.address.country,
       };
     },
-    enabled: !isLocationLookup,
+    enabled: !isCityLookup,
   });
 
-  if (isLocationLookup) {
-    return locationQuery;
+  if (isCityLookup) {
+    return cityQuery;
   }
 
   return coordinateQuery;
