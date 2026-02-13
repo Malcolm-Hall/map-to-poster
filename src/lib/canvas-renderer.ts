@@ -1,4 +1,5 @@
 import {
+  ROAD_WIDTHS,
   THEME,
   type DisplayConfig,
   type PosterResolution,
@@ -83,7 +84,7 @@ export function renderMapPoster(
     const type = el.tags?.leisure || el.tags?.landuse;
     if (!type || !el.geometry) continue;
 
-    ctx.fillStyle = THEME.park;
+    ctx.fillStyle = THEME.parks;
     drawPolygon(ctx, el.geometry, bbox, resolution);
   }
 
@@ -104,7 +105,7 @@ export function renderMapPoster(
 
   const topGrad = ctx.createLinearGradient(0, 0, 0, gradientSize);
   topGrad.addColorStop(0, THEME.gradient);
-  topGrad.addColorStop(1, "rgba(0,0,0,0)");
+  topGrad.addColorStop(1, `${THEME.gradient}00`);
   ctx.fillStyle = topGrad;
   ctx.fillRect(0, 0, resolution.width, gradientSize);
 
@@ -115,7 +116,7 @@ export function renderMapPoster(
     resolution.height - gradientSize,
   );
   bottomGrad.addColorStop(0, THEME.gradient);
-  bottomGrad.addColorStop(1, "rgba(0,0,0,0)");
+  bottomGrad.addColorStop(1, `${THEME.gradient}00`);
   ctx.fillStyle = bottomGrad;
   ctx.fillRect(
     0,
@@ -129,7 +130,7 @@ export function renderMapPoster(
   const coordFontSize = 20;
   const font = "sans-serif";
   const textGap = 20;
-  const textStartY = (resolution.height * 3) / 4;
+  const textStartY = (resolution.height * 5) / 6;
   let textY = textStartY;
 
   // Text overlay
@@ -177,23 +178,23 @@ function getRoadStyle(type: string) {
   switch (type) {
     case "motorway_link":
     case "motorway":
-      return THEME["roads"].motorway;
+      return { color: THEME.roads.motorway, width: ROAD_WIDTHS.motorway };
     case "primary":
     case "primary_link":
     case "trunk":
     case "trunk_link":
-      return THEME.roads.primary;
+      return { color: THEME.roads.primary, width: ROAD_WIDTHS.primary };
     case "secondary":
     case "secondary_link":
-      return THEME.roads.secondary;
+      return { color: THEME.roads.secondary, width: ROAD_WIDTHS.secondary };
     case "tertiary":
     case "tertiary_link":
-      return THEME.roads.tertiary;
+      return { color: THEME.roads.tertiary, width: ROAD_WIDTHS.tertiary };
     case "residential":
     case "living_street":
-      return THEME.roads.residential;
+      return { color: THEME.roads.residential, width: ROAD_WIDTHS.residential };
     case "unclassified":
     default:
-      return THEME.roads.default;
+      return { color: THEME.roads.default, width: ROAD_WIDTHS.default };
   }
 }

@@ -56,17 +56,26 @@ export const MAX_MAP_RADIUS = 20_000;
 export const DEFAULT_MAP_RADIUS = 2000;
 export const MAP_RADIUS_STEP = 100;
 
+export const ROAD_WIDTHS = {
+  motorway: 2.4,
+  primary: 1.6,
+  secondary: 1.2,
+  tertiary: 1.0,
+  residential: 0.8,
+  default: 0.6,
+};
+
 export const THEME = {
   background: "#151515",
   water: "#1f4e79",
-  park: "#1f6f54",
+  parks: "#1f6f54",
   roads: {
-    motorway: { color: "#ff0000", width: 2.4 }, //red
-    primary: { color: "#00ff00", width: 1.6 }, //green
-    secondary: { color: "#0000ff", width: 1.2 }, //blue
-    tertiary: { color: "#00ffff", width: 1.0 }, //cyan
-    residential: { color: "#ff00ff", width: 0.8 }, //magenta
-    default: { color: "#ffff00", width: 0.6 }, //yellow
+    motorway: "#ff0000", //red
+    primary: "#00ff00", //green
+    secondary: "#0000ff", //blue
+    tertiary: "#00ffff", //cyan
+    residential: "#ff00ff", //magenta
+    default: "#ffff00", //yellow
   },
   text: "#ffffff",
   gradient: "#ffffff",
