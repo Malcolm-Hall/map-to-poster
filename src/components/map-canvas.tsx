@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import type { DisplayConfig, PosterResolution } from "@/models/generation";
 import type { GeometryElement } from "@/models/osm";
 import type { OverpassBbox } from "overpass-ts";
+import type { ThemeConfig } from "@/models/theme";
 
 type Props = {
   elements: GeometryElement[];
@@ -11,6 +12,7 @@ type Props = {
   parkElements: GeometryElement[];
   bbox: OverpassBbox;
   resolution: PosterResolution;
+  theme: ThemeConfig;
   displayConfig: DisplayConfig;
 };
 
@@ -20,6 +22,7 @@ export default function MapCanvas({
   parkElements,
   bbox,
   resolution,
+  theme,
   displayConfig,
 }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -33,10 +36,19 @@ export default function MapCanvas({
         parkElements,
         bbox,
         resolution,
+        theme,
         displayConfig,
       );
     }
-  }, [elements, waterElements, parkElements, bbox, resolution, displayConfig]);
+  }, [
+    elements,
+    waterElements,
+    parkElements,
+    bbox,
+    resolution,
+    theme,
+    displayConfig,
+  ]);
 
   const handleDownload = () => {
     if (canvasRef.current) {

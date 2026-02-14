@@ -1,3 +1,5 @@
+import type { ThemeConfig } from "./theme";
+
 export const DEFAULT_CUSTOM_RESOLUTION = 1080;
 export const MAX_CUSTOM_RESOLUTION = 10_000;
 export const MIN_CUSTOM_RESOLUTION = 300;
@@ -65,22 +67,6 @@ export const ROAD_WIDTHS = {
   default: 0.6,
 };
 
-export const THEME = {
-  background: "#151515",
-  water: "#1f4e79",
-  parks: "#1f6f54",
-  roads: {
-    motorway: "#ff0000", //red
-    primary: "#00ff00", //green
-    secondary: "#0000ff", //blue
-    tertiary: "#00ffff", //cyan
-    residential: "#ff00ff", //magenta
-    default: "#ffff00", //yellow
-  },
-  text: "#ffffff",
-  gradient: "#ffffff",
-};
-
 export const MIN_LATITUDE = -90;
 export const MAX_LATITUDE = 90;
 export const MIN_LONGITUDE = -180;
@@ -110,6 +96,7 @@ export type TextConfig = {
 export type GenerationConfig = {
   lookup: Lookup;
   resolution: PosterResolution;
+  theme: ThemeConfig;
   radiusMeters: number;
   showWaterFeatures?: boolean;
   showParkFeatures?: boolean;

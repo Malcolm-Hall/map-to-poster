@@ -55,9 +55,11 @@ import {
 } from "@/components/ui/collapsible";
 import { ChevronDown, XIcon } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { BUILTIN_THEME_OPTIONS } from "@/models/theme";
 
 const baseSchema = z.object({
   resolutionType: z.literal(resolutionTypes),
+  theme: z.string(),
   customWidth: z.coerce
     .number<string>({
       error: (issue) => {
@@ -168,6 +170,7 @@ export default function InputForm(props: Props) {
       latitude: "",
       longitude: "",
       resolutionType: resolutionOptions[0].key,
+      theme: BUILTIN_THEME_OPTIONS[0].key as string,
       customWidth: DEFAULT_CUSTOM_RESOLUTION.toString(),
       customHeight: DEFAULT_CUSTOM_RESOLUTION.toString(),
       mapRadius: DEFAULT_MAP_RADIUS.toString(),
@@ -205,11 +208,16 @@ export default function InputForm(props: Props) {
         };
       }
 
+      const theme =
+        BUILTIN_THEME_OPTIONS.find(({ key }) => key === value.theme) ??
+        BUILTIN_THEME_OPTIONS[0];
+
       props.onSubmit({
         lookup,
         showWaterFeatures: value.showWaterFeatures,
         showParkFeatures: value.showParkFeatures,
         resolution,
+        theme,
         radiusMeters: Number(value.mapRadius),
         textConfig: {
           customCityText: value.customCityText,
@@ -450,6 +458,38 @@ export default function InputForm(props: Props) {
         />
 
         <form.Field
+          name="theme"
+          children={(field) => {
+            const isInvalid =
+              field.state.meta.isTouched && !field.state.meta.isValid;
+            return (
+              <Field data-invalid={isInvalid}>
+                <FieldLabel htmlFor={field.name}>Theme</FieldLabel>
+                <Select
+                  name={field.name}
+                  value={field.state.value}
+                  onValueChange={(value: ResolutionType) =>
+                    field.handleChange(value)
+                  }
+                >
+                  <SelectTrigger id="theme-select" aria-invalid={isInvalid}>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {BUILTIN_THEME_OPTIONS.map(({ name, key }) => (
+                      <SelectItem value={key} key={key}>
+                        {name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {isInvalid && <FieldError errors={field.state.meta.errors} />}
+              </Field>
+            );
+          }}
+        />
+
+        <form.Field
           name="mapRadius"
           children={(field) => {
             const isInvalid =
@@ -468,6 +508,7 @@ export default function InputForm(props: Props) {
                       step={MAP_RADIUS_STEP}
                       value={[Number.isNaN(valueNumeric) ? 0 : valueNumeric]}
                       onValueChange={(v) => field.handleChange(v[0].toString())}
+                      onBlur={field.handleBlur}
                     />
                   </div>
                   <div className="w-20">
