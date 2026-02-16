@@ -43,8 +43,8 @@ export default function useLocationQuery(lookup: Lookup) {
       return {
         lat: config.latitude,
         lon: config.longitude,
-        city: place.address.city ?? "Unknown City",
-        country: place.address.country ?? "Unknown Country",
+        city: place.address.city || place.address.state || "Unknown City",
+        country: place.address.country || "Unknown Country",
       };
     },
     enabled: !isCityLookup,
