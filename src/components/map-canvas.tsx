@@ -55,9 +55,12 @@ export default function MapCanvas({
 
   const handleDownload = () => {
     if (canvasRef.current) {
+      const city = location.city.toLowerCase().replaceAll(" ", "_");
+      const country = location.country.toLowerCase().replaceAll(" ", "_");
+      const themeName = theme.name.toLowerCase().replaceAll(" ", "_");
       exportCanvasAsPNG(
         canvasRef.current,
-        `poster_${location.city}_${location.country}.png`,
+        `${city}_${country}_${themeName}.png`,
       );
     }
   };

@@ -2,6 +2,7 @@ import InputForm from "@/components/input-form";
 import { useState } from "react";
 import type { GenerationConfig } from "@/models/generation";
 import OutputPanel from "@/components/output-panel";
+import ExamplesPanel from "@/components/examples-panel";
 
 export default function App() {
   const [config, setConfig] = useState<GenerationConfig>();
@@ -11,11 +12,9 @@ export default function App() {
       <div className="w-full max-w-lg min-w-2xs p-4">
         <InputForm onSubmit={setConfig} onReset={() => setConfig(undefined)} />
       </div>
-      {!!config && (
-        <div className="min-h-20 w-full max-w-lg min-w-2xs p-4">
-          <OutputPanel config={config} />
-        </div>
-      )}
+      <div className="min-h-20 w-full max-w-lg min-w-2xs p-4">
+        {!config ? <ExamplesPanel /> : <OutputPanel config={config} />}
+      </div>
     </main>
   );
 }
