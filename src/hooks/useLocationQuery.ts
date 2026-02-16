@@ -24,8 +24,8 @@ export default function useLocationQuery(lookup: Lookup) {
       return {
         lat: parseFloat(place.lat),
         lon: parseFloat(place.lon),
-        city: place.address.city,
-        country: place.address.country,
+        city: config.city,
+        country: config.country,
       };
     },
     enabled: isCityLookup,
@@ -43,8 +43,8 @@ export default function useLocationQuery(lookup: Lookup) {
       return {
         lat: config.latitude,
         lon: config.longitude,
-        city: place.address.city,
-        country: place.address.country,
+        city: place.address.city ?? "Unknown City",
+        country: place.address.country ?? "Unknown Country",
       };
     },
     enabled: !isCityLookup,

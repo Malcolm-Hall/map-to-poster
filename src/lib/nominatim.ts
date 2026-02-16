@@ -8,6 +8,7 @@ export async function citySearch(
     city,
     country,
     addressdetails: "1",
+    featureType: "city",
     format: "jsonv2",
     limit: "1",
   });
