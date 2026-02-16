@@ -134,6 +134,7 @@ export default function OutputPanel({ config }: Props) {
         elements={mapQuery.data}
         waterElements={config.showWaterFeatures ? (waterQuery.data ?? []) : []}
         parkElements={config.showParkFeatures ? (parkQuery.data ?? []) : []}
+        location={locationQuery.data}
         bbox={bbox}
         resolution={config.resolution}
         theme={config.theme}

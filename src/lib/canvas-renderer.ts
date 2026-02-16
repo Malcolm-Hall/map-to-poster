@@ -139,6 +139,11 @@ export function renderMapPoster(
   ctx.fillStyle = theme.text;
   ctx.textAlign = "center";
   ctx.font = `bold ${mainFontSize}px ${font}`;
+  const mainTextMetrics = ctx.measureText(options.mainHeading);
+  let scaleFactor = (0.8 * resolution.width) / mainTextMetrics.width;
+  if (scaleFactor < 1) {
+    ctx.font = `bold ${mainFontSize * scaleFactor}px ${font}`;
+  }
   ctx.fillText(options.mainHeading, resolution.width / 2, textY);
 
   textY += textGap;
@@ -148,6 +153,11 @@ export function renderMapPoster(
   textY += textGap - 10 + subFontSize;
 
   ctx.font = `${subFontSize}px ${font}`;
+  const subTextMetrics = ctx.measureText(options.subHeading);
+  scaleFactor = (0.8 * resolution.width) / subTextMetrics.width;
+  if (scaleFactor < 1) {
+    ctx.font = `${subFontSize * scaleFactor}px ${font}`;
+  }
   ctx.fillText(options.subHeading, resolution.width / 2, textY);
 
   textY += textGap + coordFontSize;

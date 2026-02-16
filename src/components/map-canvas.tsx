@@ -5,11 +5,13 @@ import type { DisplayConfig, PosterResolution } from "@/models/generation";
 import type { GeometryElement } from "@/models/osm";
 import type { OverpassBbox } from "overpass-ts";
 import type { ThemeConfig } from "@/models/theme";
+import type { Location } from "@/hooks/useLocationQuery";
 
 type Props = {
   elements: GeometryElement[];
   waterElements: GeometryElement[];
   parkElements: GeometryElement[];
+  location: Location;
   bbox: OverpassBbox;
   resolution: PosterResolution;
   theme: ThemeConfig;
@@ -20,6 +22,7 @@ export default function MapCanvas({
   elements,
   waterElements,
   parkElements,
+  location,
   bbox,
   resolution,
   theme,
@@ -54,7 +57,7 @@ export default function MapCanvas({
     if (canvasRef.current) {
       exportCanvasAsPNG(
         canvasRef.current,
-        `poster_${displayConfig.mainHeading}_${displayConfig.subHeading}.png`,
+        `poster_${location.city}_${location.country}.png`,
       );
     }
   };
