@@ -62,6 +62,15 @@ export default function MapCanvas({
   return (
     <div className="flex flex-col items-center gap-4">
       <canvas ref={canvasRef} className="rounded border border-gray-300" />
+      <p>
+        Map data from{" "}
+        <a
+          className="text-blue-600 underline visited:text-purple-600 hover:text-blue-800 hover:no-underline"
+          href="https://www.openstreetmap.org/copyright"
+        >
+          OpenStreetMap
+        </a>
+      </p>
       <Button onClick={handleDownload}>Download as PNG</Button>
     </div>
   );

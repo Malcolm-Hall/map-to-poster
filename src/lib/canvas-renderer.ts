@@ -129,6 +129,7 @@ export function renderMapPoster(
   const mainFontSize = 80;
   const subFontSize = 36;
   const coordFontSize = 20;
+  const attributionFontSize = 10;
   const font = "sans-serif";
   const textGap = 20;
   const textStartY = (resolution.height * 5) / 6;
@@ -163,6 +164,16 @@ export function renderMapPoster(
   ctx.moveTo((resolution.width - dividerLength) / 2, textStartY + textGap);
   ctx.lineTo((resolution.width + dividerLength) / 2, textStartY + textGap);
   ctx.stroke();
+
+  // Attribution
+  const attributionText = "Map data from OpenStreetMap";
+  ctx.font = `${attributionFontSize}px ${font}`;
+  const attrTextMetrics = ctx.measureText(attributionText);
+  ctx.fillText(
+    attributionText,
+    resolution.width - attributionFontSize - attrTextMetrics.width / 2,
+    resolution.height - attributionFontSize,
+  );
 }
 
 export function exportCanvasAsPNG(
