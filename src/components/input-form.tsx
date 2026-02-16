@@ -159,6 +159,7 @@ const formSchema = z.discriminatedUnion("lookupType", [
 
 type Props = {
   onSubmit: (config: GenerationConfig) => void;
+  onReset: () => void;
 };
 
 export default function InputForm(props: Props) {
@@ -229,7 +230,6 @@ export default function InputForm(props: Props) {
 
   return (
     <form
-      className="m-4 max-w-sm"
       onSubmit={(e) => {
         e.preventDefault();
         form.handleSubmit();
@@ -687,8 +687,21 @@ export default function InputForm(props: Props) {
           </CollapsibleContent>
         </Collapsible>
 
-        <Field orientation="horizontal">
-          <Button type="submit">Generate</Button>
+        <Field>
+          <Button className="hover:cursor-pointer" type="submit">
+            Generate
+          </Button>
+          <Button
+            className="hover:cursor-pointer"
+            type="reset"
+            onClick={(event) => {
+              event.preventDefault();
+              form.reset();
+              props.onReset();
+            }}
+          >
+            Reset
+          </Button>
         </Field>
       </FieldGroup>
     </form>

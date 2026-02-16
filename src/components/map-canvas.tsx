@@ -61,7 +61,18 @@ export default function MapCanvas({
 
   return (
     <div className="flex flex-col items-center gap-4">
-      <canvas ref={canvasRef} className="rounded border border-gray-300" />
+      <div className="w-full">
+        <Button
+          className="w-full hover:cursor-pointer"
+          onClick={handleDownload}
+        >
+          Download as PNG
+        </Button>
+      </div>
+      <canvas
+        ref={canvasRef}
+        className="max-w-full rounded border border-gray-300"
+      />
       <p>
         Map data from{" "}
         <a
@@ -71,7 +82,6 @@ export default function MapCanvas({
           OpenStreetMap
         </a>
       </p>
-      <Button onClick={handleDownload}>Download as PNG</Button>
     </div>
   );
 }

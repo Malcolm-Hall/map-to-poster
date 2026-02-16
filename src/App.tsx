@@ -7,9 +7,15 @@ export default function App() {
   const [config, setConfig] = useState<GenerationConfig>();
 
   return (
-    <main>
-      <InputForm onSubmit={setConfig} />
-      {!!config && <OutputPanel config={config} />}
+    <main className="flex flex-col items-center">
+      <div className="w-full max-w-lg min-w-2xs p-4">
+        <InputForm onSubmit={setConfig} onReset={() => setConfig(undefined)} />
+      </div>
+      {!!config && (
+        <div className="w-full max-w-lg min-w-2xs p-4">
+          <OutputPanel config={config} />
+        </div>
+      )}
     </main>
   );
 }

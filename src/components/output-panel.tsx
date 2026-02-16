@@ -10,6 +10,7 @@ import MapCanvas from "./map-canvas";
 import type { GeometryElement } from "@/models/osm";
 import useLocationQuery from "@/hooks/useLocationQuery";
 import { formatPosterText } from "@/lib/utils";
+import { Spinner } from "@/components/ui/spinner";
 
 type Props = {
   config: GenerationConfig;
@@ -63,56 +64,72 @@ export default function OutputPanel({ config }: Props) {
   });
 
   if (locationQuery.isPending)
-    return <div className="p-4">Searching location...</div>;
-
-  if (locationQuery.error)
     return (
-      <div className="p-4 text-red-500">
-        Error: {locationQuery.error.message}
+      <div className="flex items-center gap-2">
+        <Spinner />
+        Fetching location data...
       </div>
     );
 
-  if (mapQuery.isPending) return <div className="p-4">Generating map...</div>;
+  if (locationQuery.error)
+    return (
+      <div className="text-red-500">
+        Error fetching location data: {locationQuery.error.message}
+      </div>
+    );
+
+  if (mapQuery.isPending)
+    return (
+      <div className="flex items-center gap-2">
+        <Spinner />
+        Fetching map data...
+      </div>
+    );
 
   if (mapQuery.error)
     return (
-      <div className="p-4 text-red-500">Error: {mapQuery.error.message}</div>
+      <div className="text-red-500">
+        Error fetching map data: {mapQuery.error.message}
+      </div>
     );
 
   if (!mapQuery.data)
-    return <div className="p-4 text-red-500">No map data available</div>;
+    return <div className="text-red-500">No map data available</div>;
 
   if (config.showWaterFeatures && waterQuery.isPending)
-    return <div className="p-4">Generating water features...</div>;
-
-  if (config.showWaterFeatures && waterQuery.error)
     return (
-      <div className="p-4 text-red-500">Error: {waterQuery.error.message}</div>
-    );
-
-  if (config.showParkFeatures && !parkQuery.data)
-    return (
-      <div className="p-4 text-red-500">No park feature data available</div>
+      <div className="flex items-center gap-2">
+        <Spinner />
+        Fetching water feature data...
+      </div>
     );
 
   if (config.showParkFeatures && parkQuery.isPending)
-    return <div className="p-4">Generating park features...</div>;
-
-  if (config.showParkFeatures && parkQuery.error)
     return (
-      <div className="p-4 text-red-500">Error: {parkQuery.error.message}</div>
-    );
-
-  if (config.showParkFeatures && !parkQuery.data)
-    return (
-      <div className="p-4 text-red-500">No park feature data available</div>
+      <div className="flex items-center gap-2">
+        <Spinner />
+        Fetching park feature data...
+      </div>
     );
 
   return (
-    <div className="p-4">
-      <h2 className="mb-4 text-2xl font-bold">
-        {locationQuery.data.city}, {locationQuery.data.country}
-      </h2>
+    <>
+      <div className="mb-4">
+        <span>Found location:</span>
+        <h2 className="text-2xl font-bold">
+          {locationQuery.data.city}, {locationQuery.data.country}
+        </h2>
+        {config.showParkFeatures && parkQuery.error && (
+          <div className="mt-1 text-red-500">
+            Error fetching park feature data: {parkQuery.error.message}
+          </div>
+        )}
+        {config.showWaterFeatures && waterQuery.error && (
+          <div className="mt-1 text-red-500">
+            Error fetching water feature data: {waterQuery.error.message}
+          </div>
+        )}
+      </div>
       <MapCanvas
         elements={mapQuery.data}
         waterElements={config.showWaterFeatures ? (waterQuery.data ?? []) : []}
@@ -122,6 +139,6 @@ export default function OutputPanel({ config }: Props) {
         theme={config.theme}
         displayConfig={formatPosterText(locationQuery.data, config.textConfig)}
       />
-    </div>
+    </>
   );
 }
