@@ -33,6 +33,24 @@ const examples = [
     },
     imageSrc: "durban_south_africa_neon_cyberpunk.png",
   },
+  {
+    config: {
+      city: "Tokyo",
+      country: "Japan",
+      mapRadius: 15000,
+      theme: "Sunset",
+    },
+    imageSrc: "tokyo_japan_sunset.png",
+  },
+  {
+    config: {
+      city: "Dubai",
+      country: "UAE",
+      mapRadius: 12000,
+      theme: "Midnight Blue",
+    },
+    imageSrc: "dubai_united_arab_emirates_midnight_blue.png",
+  },
 ];
 
 export default function ExamplesPanel() {
@@ -58,7 +76,11 @@ export default function ExamplesPanel() {
           {examples.map(({ imageSrc, config }, idx) => (
             <CarouselItem key={idx}>
               <Card className="relative mx-auto w-full max-w-sm overflow-clip pt-0">
-                <img src={imageSrc} />
+                <img
+                  className="hover:cursor-pointer"
+                  onClick={() => window.open(`./${imageSrc}`, "_blank")}
+                  src={imageSrc}
+                />
                 <CardHeader>
                   <CardTitle>
                     {config.city}, {config.country}

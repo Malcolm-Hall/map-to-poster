@@ -8,6 +8,10 @@ View the live site at <https://malcolm-hall.github.io/map-to-poster>
 
 <img src="./public/durban_south_africa_neon_cyberpunk.png" width=540>
 
+<img src="./public/tokyo_japan_sunset.png" width=540>
+
+<img src="./public/dubai_united_arab_emirates_midnight_blue.png" width=540>
+
 ## Attribution
 
 Inspired by [maptoposter](https://github.com/originalankur/maptoposter) by [originalankur](https://github.com/originalankur). Make sure to check out their project if you like this one.
