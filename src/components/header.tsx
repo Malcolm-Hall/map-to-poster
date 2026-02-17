@@ -3,7 +3,7 @@ import { GithubIcon } from "lucide-react";
 
 export default function Header() {
   return (
-    <header className="bg-card/60 sticky top-0 z-40 w-full border-b backdrop-blur">
+    <header className="bg-card/60 fixed top-0 z-40 w-full border-b backdrop-blur">
       <div className="flex items-center justify-between px-4 py-3">
         <a href="/map-to-poster/" className="text-lg font-semibold">
           Map To Poster

@@ -70,8 +70,6 @@ export default function ExamplesPanel() {
 
   return (
     <>
-      <h2 className="mb-2 text-2xl font-bold">Poster Examples</h2>
-
       <Carousel
         opts={{ loop: true }}
         plugins={[Autoplay({ delay: 5_000 })]}
