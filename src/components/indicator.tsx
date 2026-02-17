@@ -6,7 +6,7 @@ import {
   ItemTitle,
 } from "@/components/ui/item";
 import { Spinner } from "@/components/ui/spinner";
-import { Check, XIcon } from "lucide-react";
+import { Check, Info, XIcon } from "lucide-react";
 
 export function IndicatorLoading(props: { title: string }) {
   return (
@@ -57,6 +57,19 @@ export function IndicatorError(props: {
           </span>
         </ItemTitle>
         <ItemDescription>{props.message}</ItemDescription>
+      </ItemContent>
+    </Item>
+  );
+}
+
+export function IndicatorInfo(props: { title: string }) {
+  return (
+    <Item className="p-2" variant="outline">
+      <ItemMedia>
+        <Info className="size-5" />
+      </ItemMedia>
+      <ItemContent>
+        <ItemTitle>{props.title}</ItemTitle>
       </ItemContent>
     </Item>
   );
