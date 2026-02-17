@@ -589,29 +589,33 @@ export default function InputForm(props: Props) {
             );
           }}
         />
-        <form.Field
-          name="showWaterFeatures"
-          children={(field) => {
-            const isInvalid =
-              field.state.meta.isTouched && !field.state.meta.isValid;
-            return (
-              <Field orientation="horizontal" data-invalid={isInvalid}>
-                <Checkbox
-                  id={field.name}
-                  name={field.name}
-                  aria-invalid={isInvalid}
-                  checked={field.state.value}
-                  onCheckedChange={(v) => field.handleChange(v as boolean)}
-                />
-                <FieldContent>
-                  <FieldLabel htmlFor={field.name}>Water Layer</FieldLabel>
-                  <FieldDescription>Experimental</FieldDescription>
-                  {isInvalid && <FieldError errors={field.state.meta.errors} />}
-                </FieldContent>
-              </Field>
-            );
-          }}
-        />
+        {import.meta.env.DEV && (
+          <form.Field
+            name="showWaterFeatures"
+            children={(field) => {
+              const isInvalid =
+                field.state.meta.isTouched && !field.state.meta.isValid;
+              return (
+                <Field orientation="horizontal" data-invalid={isInvalid}>
+                  <Checkbox
+                    id={field.name}
+                    name={field.name}
+                    aria-invalid={isInvalid}
+                    checked={field.state.value}
+                    onCheckedChange={(v) => field.handleChange(v as boolean)}
+                  />
+                  <FieldContent>
+                    <FieldLabel htmlFor={field.name}>Water Layer</FieldLabel>
+                    <FieldDescription>Experimental</FieldDescription>
+                    {isInvalid && (
+                      <FieldError errors={field.state.meta.errors} />
+                    )}
+                  </FieldContent>
+                </Field>
+              );
+            }}
+          />
+        )}
 
         <Collapsible>
           <CollapsibleTrigger asChild>

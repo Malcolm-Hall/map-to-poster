@@ -288,7 +288,10 @@ export const BUILTIN_THEME_MAP = {
       default: "#C9BBAA",
     },
   },
-  debug: {
+} satisfies Record<string, ThemeConfig>;
+
+if (import.meta.env.DEV) {
+  (BUILTIN_THEME_MAP as any)["debug"] = {
     name: "Debug",
     background: "#151515",
     text: "#ffffff",
@@ -303,8 +306,8 @@ export const BUILTIN_THEME_MAP = {
       residential: "#ff00ff",
       default: "#ffff00",
     },
-  },
-} satisfies Record<string, ThemeConfig>;
+  };
+}
 
 export type ThemeType = keyof typeof BUILTIN_THEME_MAP;
 
