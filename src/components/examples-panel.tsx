@@ -13,6 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import Autoplay from "embla-carousel-autoplay";
 
 const examples = [
   {
@@ -71,11 +72,15 @@ export default function ExamplesPanel() {
     <>
       <h2 className="mb-2 text-2xl font-bold">Poster Examples</h2>
 
-      <Carousel opts={{ loop: true }} setApi={setApi}>
+      <Carousel
+        opts={{ loop: true }}
+        plugins={[Autoplay({ delay: 5_000 })]}
+        setApi={setApi}
+      >
         <CarouselContent>
           {examples.map(({ imageSrc, config }, idx) => (
             <CarouselItem key={idx}>
-              <Card className="relative mx-auto w-full max-w-sm overflow-clip pt-0">
+              <Card className="relative mx-auto w-full overflow-clip pt-0">
                 <img
                   className="hover:cursor-pointer"
                   onClick={() => window.open(`./${imageSrc}`, "_blank")}

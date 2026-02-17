@@ -68,10 +68,7 @@ export default function MapCanvas({
   return (
     <div className="flex flex-col items-center gap-4">
       <div className="w-full">
-        <Button
-          className="w-full hover:cursor-pointer"
-          onClick={handleDownload}
-        >
+        <Button className="hover:cursor-pointer" onClick={handleDownload}>
           Download as PNG
         </Button>
       </div>
