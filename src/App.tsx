@@ -4,6 +4,7 @@ import type { GenerationConfig } from "@/models/generation";
 import OutputPanel from "@/components/output-panel";
 import Header from "@/components/header";
 import Hero from "@/components/hero";
+import { Card, CardContent } from "@/components/ui/card";
 
 export default function App() {
   const [config, setConfig] = useState<GenerationConfig>();
@@ -19,10 +20,14 @@ export default function App() {
             style={{ gridColumn: !config ? "span 5 / span 5" : "" }}
           >
             <div className="w-full p-4">
-              <InputForm
-                onSubmit={setConfig}
-                onReset={() => setConfig(undefined)}
-              />
+              <Card>
+                <CardContent>
+                  <InputForm
+                    onSubmit={setConfig}
+                    onReset={() => setConfig(undefined)}
+                  />
+                </CardContent>
+              </Card>
             </div>
           </div>
           {!!config && (

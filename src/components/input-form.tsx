@@ -582,9 +582,7 @@ export default function InputForm(props: Props) {
                   onCheckedChange={(v) => field.handleChange(v as boolean)}
                 />
                 <FieldContent>
-                  <FieldLabel htmlFor={field.name}>
-                    Enable Park Features
-                  </FieldLabel>
+                  <FieldLabel htmlFor={field.name}>Parks Layer</FieldLabel>
                   {isInvalid && <FieldError errors={field.state.meta.errors} />}
                 </FieldContent>
               </Field>
@@ -606,9 +604,7 @@ export default function InputForm(props: Props) {
                   onCheckedChange={(v) => field.handleChange(v as boolean)}
                 />
                 <FieldContent>
-                  <FieldLabel htmlFor={field.name}>
-                    Enable Water Features
-                  </FieldLabel>
+                  <FieldLabel htmlFor={field.name}>Water Layer</FieldLabel>
                   <FieldDescription>Experimental</FieldDescription>
                   {isInvalid && <FieldError errors={field.state.meta.errors} />}
                 </FieldContent>

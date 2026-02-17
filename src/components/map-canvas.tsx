@@ -66,25 +66,25 @@ export default function MapCanvas({
   };
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="w-full">
-        <Button className="hover:cursor-pointer" onClick={handleDownload}>
-          Download as PNG
-        </Button>
-      </div>
+    <div className="flex flex-col gap-2">
+      <Button className="hover:cursor-pointer" onClick={handleDownload}>
+        Download as PNG
+      </Button>
       <canvas
         ref={canvasRef}
         className="max-w-full rounded border border-gray-300"
       />
-      <p>
-        Map data from{" "}
-        <a
-          className="text-blue-600 underline visited:text-purple-600 hover:text-blue-800 hover:no-underline"
-          href="https://www.openstreetmap.org/copyright"
-        >
-          OpenStreetMap
-        </a>
-      </p>
+      <div className="place-items-center">
+        <p>
+          Map data from{" "}
+          <a
+            className="text-blue-600 underline visited:text-purple-600 hover:text-blue-800 hover:no-underline"
+            href="https://www.openstreetmap.org/copyright"
+          >
+            OpenStreetMap
+          </a>
+        </p>
+      </div>
     </div>
   );
 }
