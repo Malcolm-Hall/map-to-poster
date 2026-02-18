@@ -16,7 +16,9 @@ export default function useLocationQuery(lookup: Lookup) {
     queryKey: [
       "nominatim",
       "search",
-      isCityLookup ? [lookup.city, lookup.country] : [],
+      isCityLookup
+        ? [lookup.city.toLowerCase(), lookup.country.toLowerCase()]
+        : [],
     ],
     queryFn: async () => {
       const config = lookup as CityLookup;
