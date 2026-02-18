@@ -583,6 +583,9 @@ export default function InputForm(props: Props) {
                 />
                 <FieldContent>
                   <FieldLabel htmlFor={field.name}>Parks Layer</FieldLabel>
+                  <FieldDescription>
+                    Display parks and other grass areas
+                  </FieldDescription>
                   {isInvalid && <FieldError errors={field.state.meta.errors} />}
                 </FieldContent>
               </Field>
